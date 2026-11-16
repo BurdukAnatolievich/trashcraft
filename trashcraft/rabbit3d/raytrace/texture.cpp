@@ -13,7 +13,7 @@
 
 c_texture_manager* g_texture_manager = new c_texture_manager;
 
-bool c_texture::load_from_file(std::string file)
+bool c_texture::load_from_file(const std::string& file)
 {
     int width, height, components;
 
@@ -59,7 +59,7 @@ void c_texture_manager::initialize()
 {
     // BLOCKS
 
-    load_textures_from_directory("blocks/");
+    load_textures_from_directory("blocks/", TEXTURE_CATEGORY_BLOCK);
 
     // ATLAS
 
@@ -67,21 +67,21 @@ void c_texture_manager::initialize()
 
     // DECALS
     std::vector<c_texture*> _textures;
-    load_textures_from_directory(_textures, "blocks/destroy/");
+    load_textures_from_directory(_textures, "blocks/destroy/", TEXTURE_CATEGORY_INTERNAL);
 
     build_texture_atlas(_textures, &decal_atlas);
     
     // ITEMS
 
-    load_textures_from_directory("items/");
+    load_textures_from_directory("items/", TEXTURE_CATEGORY_ITEM);
 
     // GUI
 
-    load_textures_from_directory("gui/");
+    load_textures_from_directory("gui/", TEXTURE_CATEGORY_GUI);
 
     // ENTITIES
 
-    load_textures_from_directory("entities/");
+    load_textures_from_directory("entities/", TEXTURE_CATEGORY_ENTITY);
 }
 
 void c_texture_manager::set_flip_texture_vertically(bool flip)
@@ -89,7 +89,7 @@ void c_texture_manager::set_flip_texture_vertically(bool flip)
     stbi_set_flip_vertically_on_load(flip);
 }
 
-void c_texture_manager::load_textures_from_directory(std::vector<c_texture*>& _textures, std::string path)
+void c_texture_manager::load_textures_from_directory(std::vector<c_texture*>& _textures, const std::string& path, e_texture_category category)
 {
     for (auto& iterator : std::filesystem::directory_iterator("./textures/" + path)) {
         if (iterator.is_directory()) {
@@ -97,11 +97,11 @@ void c_texture_manager::load_textures_from_directory(std::vector<c_texture*>& _t
         }
 
         const std::filesystem::path& path = iterator.path();
-        create_texture_from_file(_textures, path.stem().string(), path.string());
+        create_texture_from_file(_textures, path.stem().string(), path.string(), category);
     }
 }
 
-void c_texture_manager::load_textures_from_directory(std::string path)
+void c_texture_manager::load_textures_from_directory(const std::string& path, e_texture_category category)
 {
     for (auto& iterator : std::filesystem::directory_iterator("./textures/" + path)) {
         if (iterator.is_directory()) {
@@ -109,11 +109,11 @@ void c_texture_manager::load_textures_from_directory(std::string path)
         }
 
         const std::filesystem::path& path = iterator.path();
-        create_texture_from_file(path.stem().string(), path.string());
+        create_texture_from_file(path.stem().string(), path.string(), category);
     }
 }
 
-c_texture* c_texture_manager::find_texture_by_name(std::string texture_name)
+c_texture* c_texture_manager::find_texture_by_name(const std::string& texture_name)
 {
     for (auto& texture : textures) {
         if (texture->name == texture_name)
@@ -123,9 +123,9 @@ c_texture* c_texture_manager::find_texture_by_name(std::string texture_name)
     return nullptr;
 }
 
-bool c_texture_manager::create_texture_from_file(std::vector<c_texture*>& _textures, std::string texture_name, std::string texture_path)
+bool c_texture_manager::create_texture_from_file(std::vector<c_texture*>& _textures, const std::string& texture_name, const std::string& texture_path, e_texture_category category)
 {
-    c_texture* texture = new c_texture(texture_name);
+    c_texture* texture = new c_texture(texture_name, category);
     if (!texture->load_from_file(texture_path)) {
         delete texture;
         return false;
@@ -135,9 +135,9 @@ bool c_texture_manager::create_texture_from_file(std::vector<c_texture*>& _textu
     return true;
 }
 
-bool c_texture_manager::create_texture_from_file(std::string texture_name, std::string texture_path)
+bool c_texture_manager::create_texture_from_file(const std::string& texture_name, const std::string& texture_path, e_texture_category category)
 {
-    c_texture* texture = new c_texture(texture_name);
+    c_texture* texture = new c_texture(texture_name, category);
     if (!texture->load_from_file(texture_path)) {
         delete texture;
         return false;
@@ -206,7 +206,7 @@ void c_texture_manager::build_texture_atlas(std::vector<c_texture*>& _textures, 
 
 void c_texture_manager::build_texture_atlas()
 {
-    texture_atlas = c_texture("texture_atlas");
+    texture_atlas = c_texture("texture_atlas", TEXTURE_CATEGORY_INTERNAL);
 
     build_texture_atlas(textures, &texture_atlas);
 }

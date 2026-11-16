@@ -10,8 +10,20 @@
 #define TEXTURE_SIZE 16
 #define ATLAS_SIZE 32
 
+enum e_texture_category : uint8_t
+{
+    TEXTURE_CATEGORY_BLOCK,
+    TEXTURE_CATEGORY_ITEM,
+    TEXTURE_CATEGORY_ENTITY,
+    TEXTURE_CATEGORY_GUI,
+    TEXTURE_CATEGORY_MISC,
+    TEXTURE_CATEGORY_INTERNAL,
+};;
+
 class c_texture {
 public:
+    e_texture_category category = TEXTURE_CATEGORY_MISC;
+
     GLuint id = 0;
     bool loaded = false;
 
@@ -29,19 +41,13 @@ public:
 
     }
 
-    c_texture(std::string n)
+    c_texture(const std::string& name, e_texture_category category)
     {
-        name = n;
+        this->name = name;
+		this->category = category;
     }
 
-    c_texture(std::string n, std::string f)
-    {
-        name = n;
-
-        load_from_file(f);
-    }
-
-    bool load_from_file(std::string file);
+    bool load_from_file(const std::string& file);
 
     inline GLuint get_id() { return id; };
     inline bool is_valid() { return loaded; };
@@ -58,13 +64,13 @@ public:
 
     void set_flip_texture_vertically(bool flip);
 
-    c_texture* find_texture_by_name(std::string texture_name);
+    c_texture* find_texture_by_name(const std::string& texture_name);
 
-    void load_textures_from_directory(std::vector<c_texture*>& _textures, std::string path);
-    void load_textures_from_directory(std::string path);
+    void load_textures_from_directory(std::vector<c_texture*>& _textures, const std::string& path, e_texture_category category = TEXTURE_CATEGORY_MISC);
+    void load_textures_from_directory(const std::string& path, e_texture_category category = TEXTURE_CATEGORY_MISC);
 
-    bool create_texture_from_file(std::vector<c_texture*>& _textures, std::string texture_name, std::string texture_path);
-    bool create_texture_from_file(std::string texture_name, std::string texture_path);
+    bool create_texture_from_file(std::vector<c_texture*>& _textures, const std::string& texture_name, const std::string& texture_path, e_texture_category category = TEXTURE_CATEGORY_MISC);
+    bool create_texture_from_file(const std::string& texture_name, const std::string& texture_path, e_texture_category category = TEXTURE_CATEGORY_MISC);
 
     void build_texture_atlas(std::vector<c_texture*>& textures, c_texture* out);
     void build_texture_atlas();
