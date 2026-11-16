@@ -33,7 +33,6 @@ void c_hud_overlay::render(float scale)
         scale
     );
 
-    // Хотбар и селектор
     float hotbar_w = 182.0f * scale;
     float hotbar_h = 22.0f * scale;
     float hotbar_x = cx - hotbar_w * 0.5f;
@@ -49,7 +48,6 @@ void c_hud_overlay::render(float scale)
         scale
     );
 
-    // Полоска XP
     float xp_y = hotbar_y - 7.0f * scale;
     g_menu_draw->sprite(mc_sprites::XP_BAR_BG, hotbar_x, xp_y, scale);
 
@@ -58,7 +56,6 @@ void c_hud_overlay::render(float scale)
         g_menu_draw->sprite("icons", hotbar_x, xp_y, 0.0f, 69.0f, 182.0f * clamped_xp, 5.0f, scale);
     }
 
-    // Уровень XP
     if (xp_level > 0) {
         std::string lvl_str = std::to_string(xp_level);
         float text_w = ImGui::CalcTextSize(lvl_str.c_str()).x * scale;
@@ -71,7 +68,6 @@ void c_hud_overlay::render(float scale)
 
     float status_y = xp_y - 10.0f * scale;
 
-    // Здоровье
     int total_hearts = static_cast<int>(std::ceil(max_health * 0.5f));
     int current_hp = static_cast<int>(std::ceil(health));
 
@@ -88,7 +84,6 @@ void c_hud_overlay::render(float scale)
         }
     }
 
-    // Броня
     if (armor > 0) {
         float armor_y = status_y - 10.0f * scale;
         for (int i = 0; i < 10; ++i) {
@@ -105,7 +100,6 @@ void c_hud_overlay::render(float scale)
         }
     }
 
-    // Голод
     float food_start_x = hotbar_x + hotbar_w - 9.0f * scale;
     for (int i = 0; i < 10; ++i) {
         float fx = food_start_x - i * 8.0f * scale;

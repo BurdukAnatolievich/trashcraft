@@ -2,6 +2,8 @@
 #include "scene.h"
 
 #include <world.h>
+#include <block.h>
+#include <global_vars.h>
 
 c_raytrace_utils* g_raytrace_utils = new c_raytrace_utils;
 
@@ -43,16 +45,16 @@ bool c_raytrace_utils::voxel_raycast(const glm::vec3& origin, const glm::vec3& d
 
         uint32_t block = g_world->get_block_at_local_pos(cur_block);
         uint16_t block_id = block & 0x3FFF;
-
         if (block_id != 0 && block_id != 0x13371337) {
-            trace.hit = true;
-            trace.hit_pos = cur_block;
-
-            trace.normal = last_normal;
-            trace.distance = current_dist;
-
-            trace.block = block;
-            return true;
+			c_block* block_ptr = (c_block*)g_global_vars->mapped_items[block_id];
+            if (block_ptr->is_solid) {
+                trace.hit = true;
+                trace.block = block_id;
+                trace.hit_pos = glm::vec3(cur_block);
+                trace.normal = last_normal;
+				trace.distance = current_dist;
+                return true;
+			}
         }
 
         if (t_max.x < t_max.y) {
