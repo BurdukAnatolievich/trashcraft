@@ -98,7 +98,10 @@ void c_input::handle_player_input()
 
         mouse_scroll = 0.0f;
 
-        g_global_vars->current_inventory_slot %= 9;
+        if (g_global_vars->current_inventory_slot > 8)
+			g_global_vars->current_inventory_slot = 0;
+        if (g_global_vars->current_inventory_slot < 0)
+			g_global_vars->current_inventory_slot = 8;
     }
 }
 
