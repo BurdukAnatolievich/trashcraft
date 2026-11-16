@@ -1,1 +1,3 @@
-# t
+# Trashcraft
+
+Trashcraft, based on very old version of Rabbit3D RT engine. So old that it lost its RT thingy during development...
