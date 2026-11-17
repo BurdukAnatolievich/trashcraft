@@ -7,8 +7,6 @@
 
 #include <rabbit3d.h>
 
-#include <Windows.h>
-
 c_input* g_input = new c_input;
 
 void c_input::initialize()

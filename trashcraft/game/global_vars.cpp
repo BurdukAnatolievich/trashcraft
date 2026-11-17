@@ -89,152 +89,71 @@ void c_global_vars::initialize_recipes()
 
 c_inventory_item* c_global_vars::give_item(c_item* item, int count)
 {
-    c_inventory_item* free_inventory_slot = nullptr;
-    if (count > item->max_count)
-        return free_inventory_slot;
+    //c_inventory_item* free_inventory_slot = nullptr;
+    //if (count > item->max_count)
+    //    return free_inventory_slot;
 
-    // scan for inventory slot with same item type
-    for (int i = e_inventory_bar::BAR_HOTBAR; i != e_inventory_bar::BAR_INVALID; i--)
-    {
-        c_inventory_item* inventory_bar = g_global_vars->inventory_items[i];
-        for (int c = 0; c < 9; c++)
-        {
-            c_inventory_item* check_slot = &inventory_bar[c];
-            if (check_slot == ignore_inventory_slot)
-                continue;
+    //// scan for inventory slot with same item type
+    //for (int i = e_inventory_bar::BAR_HOTBAR; i != e_inventory_bar::BAR_INVALID; i--)
+    //{
+    //    c_inventory_item* inventory_bar = g_global_vars->inventory_items[i];
+    //    for (int c = 0; c < 9; c++)
+    //    {
+    //        c_inventory_item* check_slot = &inventory_bar[c];
+    //        if (check_slot == ignore_inventory_slot)
+    //            continue;
 
-            if (check_slot->item_data.durability == -1 && check_slot->item_data.item == item && check_slot->count && (check_slot->count + count) < check_slot->item_data.item->max_count)
-            {
-                free_inventory_slot = check_slot;
-                break;
-            }
-        }
+    //        if (check_slot->item_data.durability == -1 && check_slot->item_data.item == item && check_slot->count && (check_slot->count + count) < check_slot->item_data.item->max_count)
+    //        {
+    //            free_inventory_slot = check_slot;
+    //            break;
+    //        }
+    //    }
 
-        if (free_inventory_slot)
-            break;
-    }
+    //    if (free_inventory_slot)
+    //        break;
+    //}
 
-    // scan for free inventory slot if we didnt found one with same item type
-    if (!free_inventory_slot)
-    {
-        for (int i = e_inventory_bar::BAR_HOTBAR; i != e_inventory_bar::BAR_INVALID; i--)
-        {
-            c_inventory_item* inventory_bar = g_global_vars->inventory_items[i];
-            for (int c = 0; c < 9; c++)
-            {
-                c_inventory_item* check_slot = &inventory_bar[c];
-                if (check_slot == ignore_inventory_slot)
-                    continue;
+    //// scan for free inventory slot if we didnt found one with same item type
+    //if (!free_inventory_slot)
+    //{
+    //    for (int i = e_inventory_bar::BAR_HOTBAR; i != e_inventory_bar::BAR_INVALID; i--)
+    //    {
+    //        c_inventory_item* inventory_bar = g_global_vars->inventory_items[i];
+    //        for (int c = 0; c < 9; c++)
+    //        {
+    //            c_inventory_item* check_slot = &inventory_bar[c];
+    //            if (check_slot == ignore_inventory_slot)
+    //                continue;
 
-                if (!check_slot->item_data.item && !check_slot->count)
-                {
-                    free_inventory_slot = check_slot;
-                    break;
-                }
-            }
+    //            if (!check_slot->item_data.item && !check_slot->count)
+    //            {
+    //                free_inventory_slot = check_slot;
+    //                break;
+    //            }
+    //        }
 
-            if (free_inventory_slot)
-                break;
-        }
-    }
+    //        if (free_inventory_slot)
+    //            break;
+    //    }
+    //}
 
-    if (free_inventory_slot)
-    {
-        free_inventory_slot->item_data.item = item;
-        free_inventory_slot->count += count;
-    }
+    //if (free_inventory_slot)
+    //{
+    //    free_inventory_slot->item_data.item = item;
+    //    free_inventory_slot->count += count;
+    //}
 
-    return free_inventory_slot;
+    //return free_inventory_slot;
 }
 
 void c_global_vars::drop_item(c_inventory_item* item, glm::vec3 origin, glm::vec3 up)
 {
-    c_dropped_item* dropped_item = new c_dropped_item();
-    g_entity_list->add_entity(dropped_item);
-
-    std::memcpy(&dropped_item->item, item, sizeof(c_inventory_item));
-
-    item->count = 0;
-    item->item_data.reset();
-
-    dropped_item->can_be_picked_up = false;
-
-    dropped_item->set_origin(origin.x != FLT_MAX ? origin : local_player->eye_position);
-    dropped_item->velocity = up.x != FLT_MAX ? up * 0.1f : camera->get_forward() * 0.1f;
+    
 }
 
 bool c_global_vars::put_item(c_inventory_item* item)
 {
-    c_inventory_item* free_inventory_slot = nullptr;
-
-    int items_left = 0;
-    int items_taken = 0;
-
-    // scan for inventory slot with same item type
-    for (int i = e_inventory_bar::BAR_HOTBAR; i != e_inventory_bar::BAR_INVALID; i--)
-    {
-        c_inventory_item* inventory_bar = g_global_vars->inventory_items[i];
-        for (int c = 0; c < 9; c++)
-        {
-            c_inventory_item* check_slot = &inventory_bar[c];
-            if (check_slot == ignore_inventory_slot)
-                continue;
-
-            if (check_slot->item_data.durability == -1 && item->item_data.durability == -1 && check_slot->item_data.item == item->item_data.item && check_slot->count && check_slot->count < 64)
-            {
-                free_inventory_slot = check_slot;
-
-                items_left = (check_slot->count + item->count) - check_slot->item_data.item->max_count;
-                items_taken = item->count - std::clamp(items_left, 0, check_slot->item_data.item->max_count);
-
-                break;
-            }
-        }
-
-        if (free_inventory_slot)
-            break;
-    }
-
-    // scan for free inventory slot if we didnt found one with same item type
-    if (!free_inventory_slot)
-    {
-        for (int i = e_inventory_bar::BAR_HOTBAR; i != e_inventory_bar::BAR_INVALID; i--)
-        {
-            c_inventory_item* inventory_bar = g_global_vars->inventory_items[i];
-            for (int c = 0; c < 9; c++)
-            {
-                c_inventory_item* check_slot = &inventory_bar[c];
-                if (check_slot == ignore_inventory_slot)
-                    continue;
-
-                if (!check_slot->item_data.item && !check_slot->count)
-                {
-                    free_inventory_slot = check_slot;
-
-                    items_left = 0;
-                    items_taken = item->count;
-                    break;
-                }
-            }
-
-            if (free_inventory_slot)
-                break;
-        }
-    }
-
-    if (free_inventory_slot)
-    {
-        free_inventory_slot->item_data = item->item_data;
-        free_inventory_slot->count += items_taken;
-
-        if (items_left <= 0)
-            std::memset(item, 0, sizeof(c_inventory_item));
-        else
-            item->count = items_left;
-
-        return true;
-    }
-
     return false;
 }
 

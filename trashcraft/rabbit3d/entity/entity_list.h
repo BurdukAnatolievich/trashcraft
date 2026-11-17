@@ -2,6 +2,7 @@
 #include "config.h"
 
 #include <item.h>
+#include <inventory.h>
 #include <input.h>
 
 #include <ext.hpp>
@@ -197,11 +198,15 @@ public:
 
     c_model* held_item_model = nullptr;
 
+	c_inventory inventory = c_inventory();
+
     void bind_camera(c_camera* camera);
     void unbind_camera();
 
     inline c_camera* get_bound_camera() { return this->camera; };
     inline c_player_animation_state* get_anim_state() { return this->animation_state; };
+
+	inline c_inventory_item* get_held_item() { return inventory.items[e_inventory_bar::BAR_HOTBAR][g_global_vars->current_inventory_slot].get_ptr(); };
 
     void respawn();
     void do_damage(int hp, e_damage_reason reason, c_entity* attacker);

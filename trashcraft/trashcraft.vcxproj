@@ -150,7 +150,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;GLM_ENABLE_EXPERIMENTAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -188,6 +188,7 @@
     <ClCompile Include="game\gui\hud.cpp" />
     <ClCompile Include="game\gui\main_menu.cpp" />
     <ClCompile Include="game\input.cpp" />
+    <ClCompile Include="game\inventory.cpp" />
     <ClCompile Include="game\item.cpp" />
     <ClCompile Include="game\menu.cpp" />
     <ClCompile Include="game\menu_draw.cpp" />
@@ -201,6 +202,7 @@
     <ClCompile Include="rabbit3d\entity\entity_list.cpp" />
     <ClCompile Include="rabbit3d\entity\player.cpp" />
     <ClCompile Include="rabbit3d\entity\player_anim_state.cpp" />
+    <ClCompile Include="rabbit3d\memory\pool.cpp" />
     <ClCompile Include="rabbit3d\raytrace\camera.cpp" />
     <ClCompile Include="rabbit3d\raytrace\skybox.cpp" />
     <ClCompile Include="rabbit3d\raytrace\models.cpp" />
@@ -538,12 +540,14 @@
     <ClInclude Include="game\gui\main_menu.h" />
     <ClInclude Include="game\gui\overlay.h" />
     <ClInclude Include="game\input.h" />
+    <ClInclude Include="game\inventory.h" />
     <ClInclude Include="game\item.h" />
     <ClInclude Include="game\menu.h" />
     <ClInclude Include="game\save.h" />
     <ClInclude Include="game\world.h" />
     <ClInclude Include="rabbit3d\audio\audio_manager.h" />
     <ClInclude Include="rabbit3d\audio\bass.h" />
+    <ClInclude Include="rabbit3d\memory\pool.h" />
     <ClInclude Include="rabbit3d\raytrace\models.h" />
     <ClInclude Include="rabbit3d\raytrace\shader.h" />
     <ClInclude Include="rabbit3d\config.h" />

@@ -15,12 +15,12 @@ public:
 
     std::string description = "";
 
-    int numeric_id = 0;
+    uint16_t numeric_id = 0;
 
     inline std::string get_name() { return name; };
     inline std::string get_id() { return id; };
 
-    inline int get_numeric_id() { return numeric_id; };
+    inline uint16_t get_numeric_id() { return numeric_id; };
 };
 
 class c_item : public c_registry
@@ -38,17 +38,17 @@ public:
     c_item(std::string register_name, std::string register_id, int max_count = 64);
     c_item(std::string register_name, std::string register_id, std::string material, int max_count = 64);
 
-    int type = 0;
-    int max_count = 64;
+    uint16_t type = 0;
+    uint16_t max_count = 64;
 
-    c_texture* item_material = nullptr;
     c_model* item_model = nullptr;
+    c_texture* item_material = nullptr;
 };
 
 class c_tool : public c_item
 {
 public:
-    enum e_tool
+    enum e_tool : uint16_t
     {
         NONE = (1 << 0),
         ANY = (1 << 1),
@@ -56,19 +56,16 @@ public:
         SHOVEL = (1 << 3),
         AXE = (1 << 4),
         HOE = (1 << 5),
-
     };
 
     c_tool();
     c_tool(std::string register_name, std::string register_id, int tool_type, int tool_durability, int tool_efficiency);
     c_tool(std::string register_name, std::string register_id, int tool_type, int tool_durability, int tool_efficiency, std::string material);
 
-    int tool = 0;
+    uint16_t tool = 0;
 
-    int durability = 0;
-    int efficiency = 0;
-
-    //c_scene_object* create_scene_object(Vector origin, Vector size = Vector(1.0f, 1.0f, 1.0f));
+    uint16_t durability = 0;
+    uint16_t efficiency = 0;
 };
 
 class c_music_disc : public c_item
@@ -78,29 +75,22 @@ public:
     c_music_disc(std::string register_name, std::string register_id, std::string register_desc, std::string music_id);
     c_music_disc(std::string register_name, std::string register_id, std::string register_desc, std::string music_id, std::string material);
 
-    std::string music_id = "";
-};
-
-class c_item_data
-{
-public:
-    c_item_data();
-    c_item_data(c_item* item);
-
-    void reset();
-
-    c_item* item = nullptr;
-
-    int durability = -1;
+    char music_id[64] = { 0 };
 };
 
 class c_inventory_item
 {
 public:
-    c_item_data item_data;
+    uint16_t id = 0;
 
-    int count = 0;
-    c_inventory_item* last_position = nullptr;
+    uint16_t count = 0;
+    uint16_t usage_count = 0;
+
+	inline bool is_empty() { return !count || !id; };
+    inline void decrement_count(uint16_t amount = 1) { count = std::max(0, count - amount); if (!count) reset(); };
+
+    inline void reset() { id = count = usage_count = 0; };
+    c_item* get_ptr();
 };
 
 class c_crafting_recipe : public c_registry

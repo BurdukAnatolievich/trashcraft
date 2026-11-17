@@ -23,9 +23,10 @@ c_player::c_player()
 
 c_player::~c_player()
 {
-    delete animation_state;
-    if (held_item_model) {
-        g_render->request_free(held_item_model);
+    delete this->animation_state;
+    if (this->held_item_model) {
+        g_render->request_free(this->held_item_model);
+        this->held_item_model = nullptr;
     }
 }
 
@@ -48,14 +49,13 @@ void c_player::unbind_camera()
 
 void c_player::do_damage(int hp, e_damage_reason reason, c_entity* attacker)
 {
-    int last_health = health;
-    health -= hp;
+    int last_health = this->health;
+    this->health -= hp;
 
     player_damage_event_t damage_event_data = { hp, reason, this, attacker };
     g_event_manager->handle_listeners("on_player_damage", &damage_event_data);
 
-    if (last_health > 0 && health <= 0)
-    {
+    if (last_health > 0 && this->health <= 0) {
         player_death_event_t death_event_data = { reason, this, attacker };
         g_event_manager->handle_listeners("on_player_death", &death_event_data);
     }
@@ -63,26 +63,21 @@ void c_player::do_damage(int hp, e_damage_reason reason, c_entity* attacker)
 
 void c_player::respawn()
 {
-    delete animation_state;
-    animation_state = new c_player_animation_state(this);
+    delete this->animation_state;
+    this->animation_state = new c_player_animation_state(this);
 
-    fall_origin = glm::vec3(FLT_MAX);
+    this->fall_origin = glm::vec3(FLT_MAX);
 
-    set_origin(spawn_point);
-    set_last_origin(spawn_point);
+    this->health = 20;
+    this->is_alive = true;
 
-    health = 20;
-    is_alive = true;
+    this->next_attack_time = this->next_interaction_time = 0.0f;
 
-    next_attack_time = next_interaction_time = 0.0f;
-
-    chunk = glm::ivec2(0);
-
-    velocity = last_velocity = glm::vec3(0.0f);
-    //chunk_origin = last_chunk_origin = glm::ivec3(0);
-
-    view_angle = last_view_angle = glm::vec2(0.0f);
-    rotation = last_rotation = glm::vec3(0.0f);
+	this->origin = this->last_origin = this->spawn_point;
+    this->velocity = this->last_velocity = glm::vec3(0.0f);
+    this->view_angle = this->last_view_angle = glm::vec2(0.0f);
+    this->rotation = this->last_rotation = glm::vec3(0.0f);
+    this->chunk = this->last_chunk = glm::ivec2(0);
 }
 
 void c_player::attack()
@@ -100,7 +95,7 @@ void c_player::attack()
         return;
     }
 
-    c_item* hotbar_item = inv_item->item_data.item;
+    c_item* hotbar_item = inv_item->get_ptr();
 
     if (input.buttons & IN_ATTACK) {
         if (simulation_time < next_attack_time) {
@@ -184,7 +179,7 @@ void c_player::interact()
         return;
     }
 
-    c_item* hotbar_item = inv_item->item_data.item;
+    c_item* hotbar_item = inv_item->get_ptr();
 
     float cur_time = g_time->get_current_time();
     if (input.buttons & IN_ACTION) {
@@ -251,7 +246,7 @@ void c_player::update_looking_at()
 
 void c_player::update_held_item()
 {
-    held_item = g_global_vars->inventory_items[e_inventory_bar::BAR_HOTBAR][g_global_vars->current_inventory_slot].item_data.item;
+    held_item = g_global_vars->inventory_items[e_inventory_bar::BAR_HOTBAR][g_global_vars->current_inventory_slot].get_ptr();
 
     if (held_item != last_held_item) {
         if (held_item_model) {

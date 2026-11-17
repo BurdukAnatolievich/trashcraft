@@ -1,8 +1,9 @@
 #include "camera.h"
+
 #include <input.h>
-#include <imgui.h>
-#include <Windows.h>
 #include <time/time.h>
+
+#include <imgui.h>
 
 void c_camera::update()
 {

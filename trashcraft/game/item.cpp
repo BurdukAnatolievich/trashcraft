@@ -42,29 +42,6 @@ c_item::c_item(std::string register_name, std::string register_id, std::string m
     g_global_vars->items[register_id] = this;
 }
 
-c_item_data::c_item_data()
-{
-    this->item = nullptr;
-    this->durability = 0;
-}
-
-c_item_data::c_item_data(c_item* item)
-{
-    this->item = item;
-
-    if (item->type == c_item::e_type::TOOL)
-    {
-        c_tool* tool = (c_tool*)item;
-        this->durability = tool->durability;
-    }
-}
-
-void c_item_data::reset()
-{
-    this->item = nullptr;
-    this->durability = -1;
-}
-
 c_tool::c_tool()
 {
     this->type = c_item::e_type::TOOL;
@@ -116,41 +93,39 @@ c_music_disc::c_music_disc()
     type = c_item::e_type::RECORD;
 }
 
-c_music_disc::c_music_disc(std::string register_name, std::string register_id, std::string register_desc, std::string music_id_)
+c_music_disc::c_music_disc(std::string register_name, std::string register_id, std::string register_desc, std::string music_id)
 {
     this->id = register_id;
     this->name = register_name;
-
-    this->numeric_id = g_global_vars->items.size();
-
     this->description = register_desc;
+    this->numeric_id = g_global_vars->items.size();
 
     this->type = c_item::e_type::RECORD;
 
-    this->music_id = music_id_;
-
     this->max_count = 1;
+
+    std::memset(this->music_id, 0, sizeof(this->music_id));
+    std::memcpy(this->music_id, music_id.data(), std::min(music_id.size(), sizeof(this->music_id) - 1));
 
     g_global_vars->items[register_id] = this;
 }
 
-c_music_disc::c_music_disc(std::string register_name, std::string register_id, std::string register_desc, std::string music_id_, std::string material)
+c_music_disc::c_music_disc(std::string register_name, std::string register_id, std::string register_desc, std::string music_id, std::string material)
 {
     this->id = register_id;
     this->name = register_name;
-
+    this->description = register_desc;
     this->numeric_id = g_global_vars->items.size();
 
-    this->description = register_desc;
-
     this->type = c_item::e_type::RECORD;
-
-    this->music_id = music_id_;
 
     this->item_material = g_texture_manager->find_texture_by_name(material);
     this->item_model = g_model_manager->find_model_by_name(material);
 
     this->max_count = 1;
+
+    std::memset(this->music_id, 0, sizeof(this->music_id));
+    std::memcpy(this->music_id, music_id.data(), std::min(music_id.size(), sizeof(this->music_id) - 1));
 
     g_global_vars->items[register_id] = this;
 }
@@ -270,26 +245,26 @@ bool c_crafting_recipe::check_crafting_recipe(c_crafting_recipe::e_grid_type gri
     //needed_empty_slots = grid_x * grid_y - needed_matches;
 
     // scan grid and do matching
-    for (int y = 0; y < grid_y; y++)
-    {
-        for (int x = 0; x < grid_x; x++)
-        {
-            int real_x = x - pos_clamped_x;
-            int real_y = y - pos_clamped_y;
+    //for (int y = 0; y < grid_y; y++)
+    //{
+    //    for (int x = 0; x < grid_x; x++)
+    //    {
+    //        int real_x = x - pos_clamped_x;
+    //        int real_y = y - pos_clamped_y;
 
-            c_inventory_item* grid_item = &g_global_vars->crafting_grid_items[y][x];
-            std::string item_id = grid_item->item_data.item && grid_item->count ? grid_item->item_data.item->id : "";
+    //        c_inventory_item* grid_item = &g_global_vars->crafting_grid_items[y][x];
+    //        std::string item_id = grid_item->count ? grid_item->id : "";
 
-            if (real_x < 0 || real_y < 0 || real_y >= recipe.size() || real_x >= recipe.at(real_y).size())
-                continue;
+    //        if (real_x < 0 || real_y < 0 || real_y >= recipe.size() || real_x >= recipe.at(real_y).size())
+    //            continue;
 
-            if (item_id == "")
-                continue;
+    //        if (item_id == "")
+    //            continue;
 
-            if (recipe[real_y][real_x] == item_id)
-                found_matches++;
-        }
-    }
+    //        if (recipe[real_y][real_x] == item_id)
+    //            found_matches++;
+    //    }
+    //}
 
     // is it perfect matching or no?
     return found_matches == needed_matches;
@@ -339,17 +314,10 @@ void c_crafting_recipe::process_crafting()
 
 void c_crafting_recipe::on_take_item()
 {
-    for (int y = 0; y < 3; y++)
-    {
-        for (int x = 0; x < 3; x++)
-        {
-            c_inventory_item* grid_item = &g_global_vars->crafting_grid_items[y][x];
-            if (grid_item->item_data.item)
-            {
-                grid_item->count--;
-                if (!grid_item->count)
-                    grid_item->item_data.reset();
-            }
-        }
-    }
+    
+}
+
+c_item* c_inventory_item::get_ptr()
+{
+    return is_empty() ? g_global_vars->mapped_items[id] : nullptr;
 }

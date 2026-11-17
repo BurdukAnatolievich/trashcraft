@@ -12,17 +12,7 @@ void c_dropped_item::create_model()
     if (get_model())
         return;
 
-    c_item* item_ = item.item_data.item;
-    if (!item_)
-        return;
 
-    if (item_->type == c_item::e_type::BLOCK) {
-        c_block* block = (c_block*)item_;
-        set_model(block->create_scene_object(origin, 0.35f));
-    }
-    else if (item_->item_model) {
-        set_model(g_model_manager->get_model_instance(item_->item_model));
-    }
 }
 
 void c_dropped_item::update()
@@ -92,6 +82,6 @@ void c_dropped_item::update()
     create_model();
     update_model();
 
-    if (!item.count || !item.item_data.item)
+    if (item.is_empty())
         should_be_destroyed = true;
 }

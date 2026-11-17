@@ -74,23 +74,6 @@ void c_game::start()
     else
         g_world_save->create_world(g_global_vars->world_name, g_global_vars->world_name);
 
-    g_global_vars->inventory_items[e_inventory_bar::BAR_HOTBAR][0].count = 32;
-    g_global_vars->inventory_items[e_inventory_bar::BAR_HOTBAR][0].item_data.reset();
-    g_global_vars->inventory_items[e_inventory_bar::BAR_HOTBAR][0].item_data.item = g_global_vars->items["glass"];
-
-    g_global_vars->inventory_items[e_inventory_bar::BAR_HOTBAR][1].count = 20;
-    g_global_vars->inventory_items[e_inventory_bar::BAR_HOTBAR][1].item_data.reset();
-    g_global_vars->inventory_items[e_inventory_bar::BAR_HOTBAR][1].item_data.item = g_global_vars->items["jukebox"];
-
-    g_global_vars->inventory_items[e_inventory_bar::BAR_HOTBAR][2].count = 3;
-    g_global_vars->inventory_items[e_inventory_bar::BAR_HOTBAR][2].item_data.reset();
-    g_global_vars->inventory_items[e_inventory_bar::BAR_HOTBAR][2].item_data.item = g_global_vars->items["diamond"];
-
-    g_global_vars->inventory_items[e_inventory_bar::BAR_HOTBAR][3].count = 1;
-    g_global_vars->inventory_items[e_inventory_bar::BAR_HOTBAR][3].item_data.reset();
-    g_global_vars->inventory_items[e_inventory_bar::BAR_HOTBAR][3].item_data.item = g_global_vars->items["iron_pickaxe"];
-
-
     g_global_vars->in_game = true;
 }
 

@@ -329,7 +329,7 @@ void c_world::generate_world_based_on_player_position()
     }
 
     constexpr size_t thread_count = 12;
-    size_t actual_threads = min(thread_count, chunks_to_generate.size());
+    size_t actual_threads = std::min(thread_count, chunks_to_generate.size());
 
     std::vector<std::thread> workers;
     workers.reserve(actual_threads);
@@ -461,7 +461,7 @@ bool c_world::remove_block(world_chunk_t* chunk, const glm::ivec3& local_pos)
 
 void c_world::build_block_mesh(c_mesh* mesh, glm::vec3 local_pos, c_block* block, int side)
 {
-    int material_side = max(side - e_side::S_LEFT, 0);
+    int material_side = std::max(side - e_side::S_LEFT, 0);
     c_texture* material = block->materials[material_side] ? block->materials[material_side] : block->materials[c_block::e_material::SIDE];
 
     glm::vec3 min = local_pos + block->min, max = local_pos + block->max;

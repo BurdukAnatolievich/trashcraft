@@ -154,6 +154,12 @@
     <ClCompile Include="game\gui\hud.cpp">
       <Filter>sources</Filter>
     </ClCompile>
+    <ClCompile Include="rabbit3d\memory\pool.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="game\inventory.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rabbit3d\raytrace\shader.h" />
@@ -500,6 +506,8 @@
     <ClInclude Include="game\gui\overlay.h" />
     <ClInclude Include="game\gui\gui_screen.h" />
     <ClInclude Include="game\gui\hud.h" />
+    <ClInclude Include="rabbit3d\memory\pool.h" />
+    <ClInclude Include="game\inventory.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="rabbit3d\audio\bass.dll" />

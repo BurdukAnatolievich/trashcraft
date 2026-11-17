@@ -13,6 +13,8 @@ constexpr int CHUNK_SIZE_SHIFT = 4;
 constexpr int MAX_RENDER_DIST = 16;
 constexpr int MAX_RENDER_DIST_R = MAX_RENDER_DIST / 2;
 
+constexpr int INVENTORY_BAR_COUNT = 3;
+
 class c_rabbit3d_config
 {
     glm::vec2 screen_resolution = glm::vec2(0.0f);
