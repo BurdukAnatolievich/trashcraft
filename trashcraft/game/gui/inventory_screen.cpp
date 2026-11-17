@@ -89,40 +89,20 @@ void c_inventory_screen::render_slot_item(c_inventory_item* item, float x, float
     if (item->is_empty())
         return;
 
-    float size = 16.0f * scale;
-
-    c_item* item_ptr = item->get_ptr();
-    if (item_ptr) {
-        if (item_ptr->type == c_item::e_type::BLOCK) {
-            g_menu_draw->draw_iso_block(static_cast<c_block*>(item_ptr), x, y, size);
-        }
-        else if (item_ptr->item_material) {
-            g_menu_draw->sprite(item_ptr->item_material, x, y, 0.0f, 0.0f, 1.0f, 1.0f, scale);
-        }
-    }
-
-    if (item->count > 1) {
-        std::string count_str = std::to_string(item->count);
-
-		c_menu_draw::rect_size_t text_size = g_menu_draw->text_size(count_str, scale);
-        float tx = std::floor(x + size + 1.0f * scale - text_size.width);
-        float ty = std::floor(y + size + 1.0f * scale - text_size.height);
-
-        g_menu_draw->text(count_str, tx, ty, scale);
-    }
+    g_menu_draw->draw_items(item, x, y, scale);
 }
 
 int c_inventory_screen::build_slots(c_inventory* inventory, slot_entry_t* out_slots)
 {
     int count = 0;
-    for (int row = 0; row < 3; row++) {
-        for (int col = 0; col < 9; col++) {
+    for (int row = 0; row < INVENTORY_BAR_COUNT; row++) {
+        for (int col = 0; col < INVENTORY_BAR_SIZE; col++) {
             out_slots[count++] = { inventory->get_item(row, col), 8.0f + col * 18.0f, 84.0f + row * 18.0f, false };
         }
     }
 
-    for (int col = 0; col < 9; col++) {
-        out_slots[count++] = { inventory->get_item(e_inventory_bar::BAR_HOTBAR, col), 8.0f + col * 18.0f, 142.0f, false };
+    for (int col = 0; col < INVENTORY_BAR_SIZE; col++) {
+        out_slots[count++] = { inventory->get_hotbar_item(col), 8.0f + col * 18.0f, 142.0f, false};
     }
 
     for (int row = 0; row < 2; row++) {

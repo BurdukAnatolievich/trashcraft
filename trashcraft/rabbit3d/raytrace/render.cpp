@@ -471,6 +471,29 @@ void c_render::render_main()
     render_viewmodel();
 }
 
+glm::mat4 get_hand_block_matrix(float swing_progress = 0.0f, float equip_progress = 1.0f)
+{
+    glm::mat4 model = glm::mat4(1.0f);
+
+    float y_offset = -0.52f - (1.0f - equip_progress) * 0.6f;
+    model = glm::translate(model, glm::vec3(0.56f, y_offset, -0.72f));
+    model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+    if (swing_progress > 0.0f) {
+        float sin1 = std::sin(swing_progress * swing_progress * 3.14159265f);
+        float sin2 = std::sin(std::sqrt(swing_progress) * 3.14159265f);
+
+        model = glm::translate(model, glm::vec3(-sin2 * 0.4f, std::sin(std::sqrt(swing_progress) * 3.14159265f * 2.0f) * 0.2f, -sin1 * 0.2f));
+        model = glm::rotate(model, glm::radians(-sin1 * 20.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(-sin2 * 20.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::rotate(model, glm::radians(-sin2 * 80.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    }
+
+    model = glm::scale(model, glm::vec3(0.4f));
+
+    return model;
+}
+
 void c_render::render_viewmodel()
 {
     if (!current_shader || !camera || !g_global_vars->local_player) {
@@ -492,42 +515,50 @@ void c_render::render_viewmodel()
     current_shader->set_int("texture_atlas", 0);
 
     glm::mat4 inv_view = glm::inverse(camera->get_view_matrix());
-    glm::mat4 hand = glm::mat4(1.0f);
+    //glm::mat4 hand = glm::mat4(1.0f);
 
-    hand = glm::translate(hand, glm::vec3(0.56f, -0.52f, -0.72f));
+    //hand = glm::translate(hand, glm::vec3(0.56f, -0.52f, -0.72f));
 
     c_player_animation_state* anim_state = local->get_anim_state();
-    if (anim_state && anim_state->firstperson_hand_swing > 0.0f) {
-        float swing = glm::clamp(anim_state->firstperson_hand_swing, 0.0f, 1.0f);
-
-        float f = std::sin(swing * glm::pi<float>());
-        float f1 = std::sin(std::sqrt(swing) * glm::pi<float>());
-        float f2 = std::sin(swing * swing * glm::pi<float>());
-
-        hand = glm::translate(hand, glm::vec3(
-            -0.4f * f1,
-            0.2f * std::sin(std::sqrt(swing) * glm::pi<float>() * 2.0f),
-            -0.2f * f
-        ));
-
-        hand = glm::rotate(hand, glm::radians(45.0f * f1), glm::vec3(0.0f, 1.0f, 0.0f));
-        hand = glm::rotate(hand, glm::radians(-20.0f * f2), glm::vec3(0.0f, 0.0f, 1.0f));
-        hand = glm::rotate(hand, glm::radians(-80.0f * f1), glm::vec3(1.0f, 0.0f, 0.0f));
-        hand = glm::rotate(hand, glm::radians(-45.0f * f1), glm::vec3(0.0f, 1.0f, 0.0f));
-    }
-
-    if (held_model) {
-        hand = glm::translate(hand, glm::vec3(0.07f, 0.20f, 0.07f));
-        hand = glm::rotate(hand, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        hand = glm::rotate(hand, glm::radians(25.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        hand = glm::scale(hand, glm::vec3(0.68f));
-
+    if (held_item->type == c_item::e_type::BLOCK) {
+		glm::mat4 hand = get_hand_block_matrix(anim_state ? anim_state->firstperson_hand_swing : 0.0f, 1.0f);
         current_shader->set_mat4("model", inv_view * hand);
 
         for (auto& mesh : held_model->meshes) {
             mesh.draw();
         }
     }
+    //if (anim_state && anim_state->firstperson_hand_swing > 0.0f) {
+    //    float swing = glm::clamp(anim_state->firstperson_hand_swing, 0.0f, 1.0f);
+
+    //    float f = std::sin(swing * glm::pi<float>());
+    //    float f1 = std::sin(std::sqrt(swing) * glm::pi<float>());
+    //    float f2 = std::sin(swing * swing * glm::pi<float>());
+
+    //    hand = glm::translate(hand, glm::vec3(
+    //        -0.4f * f1,
+    //        0.2f * std::sin(std::sqrt(swing) * glm::pi<float>() * 2.0f),
+    //        -0.2f * f
+    //    ));
+
+    //    hand = glm::rotate(hand, glm::radians(45.0f * f1), glm::vec3(0.0f, 1.0f, 0.0f));
+    //    hand = glm::rotate(hand, glm::radians(-20.0f * f2), glm::vec3(0.0f, 0.0f, 1.0f));
+    //    hand = glm::rotate(hand, glm::radians(-80.0f * f1), glm::vec3(1.0f, 0.0f, 0.0f));
+    //    hand = glm::rotate(hand, glm::radians(-45.0f * f1), glm::vec3(0.0f, 1.0f, 0.0f));
+    //}
+
+    //if (held_model) {
+    //    hand = glm::translate(hand, glm::vec3(0.07f, 0.20f, 0.07f));
+    //    hand = glm::rotate(hand, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    //    hand = glm::rotate(hand, glm::radians(25.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    //    hand = glm::scale(hand, glm::vec3(0.68f));
+
+    //    current_shader->set_mat4("model", inv_view * hand);
+
+    //    for (auto& mesh : held_model->meshes) {
+    //        mesh.draw();
+    //    }
+    //}
 
     glEnable(GL_CULL_FACE);
 }

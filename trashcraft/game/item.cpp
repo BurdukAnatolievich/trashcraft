@@ -308,5 +308,5 @@ void c_crafting_recipe::on_take_item()
 
 c_item* c_inventory_item::get_ptr()
 {
-    return is_empty() ? g_global_vars->mapped_items[id] : nullptr;
+    return !is_empty() ? g_global_vars->mapped_items[id] : nullptr;
 }

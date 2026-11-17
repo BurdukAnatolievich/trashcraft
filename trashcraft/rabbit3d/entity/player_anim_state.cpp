@@ -17,27 +17,27 @@ void c_player_animation_state::update(float eye_yaw, float eye_pitch)
         initialized = true;
     }
 
-    bool stop_swing = false;
     if (owner->attack_progress > 0.0f) {
         if (!firstperson_swinging) {
-            // Ќебольшой мгновенный старт при первом клике, как в ванильном первом тике
             firstperson_hand_swing = 0.08f;
+            firstperson_last_hand_swing = 0.08f;
         }
         firstperson_swinging = true;
-    }
-    else {
-        stop_swing = true;
     }
 
     if (firstperson_swinging) {
         firstperson_last_hand_swing = firstperson_hand_swing;
-        firstperson_hand_swing += g_time->get_frame_time() / 0.24f;
+        firstperson_hand_swing += g_time->get_frame_time() / 0.25f;
 
         if (firstperson_hand_swing >= 1.0f) {
-            firstperson_hand_swing = 0.0f;
-
-            if (stop_swing) {
+            if (owner->attack_progress <= 0.0f) {
+                firstperson_hand_swing = 0.0f;
+                firstperson_last_hand_swing = 0.0f;
                 firstperson_swinging = false;
+            }
+            else {
+                firstperson_hand_swing -= 1.0f;
+                firstperson_last_hand_swing = 0.0f;
             }
         }
     }

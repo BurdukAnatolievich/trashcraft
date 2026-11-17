@@ -170,6 +170,8 @@ void c_global_vars::start()
     std::memcpy(player->name, "Steve", sizeof("Steve"));
     player->respawn();
 
+	player->inventory.items[0] = { g_global_vars->items["cherry_planks"]->numeric_id, 64 };
+
     g_entity_list->add_entity(player);
 }
 

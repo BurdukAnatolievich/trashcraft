@@ -74,6 +74,7 @@ public:
     void sprite(const gui_sprite_t& sprite, float x, float y, float scale = 1.0f, ImU32 color = IM_COL32_WHITE);
 
     void draw_iso_block(c_block* block, float x, float y, float size);
+    void draw_items(c_inventory_item* item, float x, float y, float scale);
 };
 
 class c_ui_manager {

@@ -215,28 +215,18 @@ bool c_model_manager::create_model_from_block(c_block* block)
     const float v0 = 1.0f - block->min.y, v1 = 1.0f - block->max.y;
     const float w0 = block->min.z, w1 = block->max.z;
 
+    model->meshes.reserve(6);
     auto add_face = [&](c_block::e_material mat,
         const glm::vec3& a, const glm::vec3& b, const glm::vec3& c, const glm::vec3& d,
         const glm::vec3& normal,
         const glm::vec2& t0, const glm::vec2& t1, const glm::vec2& t2, const glm::vec2& t3)
         {
-            c_texture* tex = block->materials[mat];
+            c_texture* tex = block->materials[mat] ? block->materials[mat] : block->materials[c_block::e_material::SIDE];
             if (!tex)
                 return;
 
-            c_mesh* mesh = nullptr;
-            for (auto& m : model->meshes) {
-                if (m.texture == tex) {
-                    mesh = &m;
-                    break;
-                }
-            }
-
-            if (!mesh) {
-                mesh = &model->meshes.emplace_back();
-                mesh->texture = tex;
-                mesh->should_reassemble_vb = true;
-            }
+            c_mesh* mesh = &model->meshes.emplace_back(c_mesh(tex->name, { 0.0f, 0.0f, 0.0f }, tex));
+            mesh->should_reassemble_vb = true;
 
             mesh->vertices.push_back({ a, normal, t0 });
             mesh->vertices.push_back({ b, normal, t1 });
@@ -247,14 +237,14 @@ bool c_model_manager::create_model_from_block(c_block* block)
             mesh->vertices.push_back({ a, normal, t0 });
         };
 
-    add_face(c_block::SIDE, { p1.x, p0.y, p1.z }, { p1.x, p0.y, p0.z }, { p1.x, p1.y, p0.z }, { p1.x, p1.y, p1.z }, { 1.0f, 0.0f, 0.0f }, { 1.0f - w1, v0 }, { 1.0f - w0, v0 }, { 1.0f - w0, v1 }, { 1.0f - w1, v1 });
-    add_face(c_block::SIDE, { p0.x, p0.y, p0.z }, { p0.x, p0.y, p1.z }, { p0.x, p1.y, p1.z }, { p0.x, p1.y, p0.z }, { -1.0f, 0.0f, 0.0f }, { w0, v0 }, { w1, v0 }, { w1, v1 }, { w0, v1 });
+    add_face(c_block::e_material::SIDE, { p1.x, p0.y, p1.z }, { p1.x, p0.y, p0.z }, { p1.x, p1.y, p0.z }, { p1.x, p1.y, p1.z }, { 1.0f, 0.0f, 0.0f }, { 1.0f - w1, v0 }, { 1.0f - w0, v0 }, { 1.0f - w0, v1 }, { 1.0f - w1, v1 });
+    add_face(c_block::e_material::SIDE, { p0.x, p0.y, p0.z }, { p0.x, p0.y, p1.z }, { p0.x, p1.y, p1.z }, { p0.x, p1.y, p0.z }, { -1.0f, 0.0f, 0.0f }, { w0, v0 }, { w1, v0 }, { w1, v1 }, { w0, v1 });
 
-    add_face(c_block::UPPER, { p0.x, p1.y, p1.z }, { p1.x, p1.y, p1.z }, { p1.x, p1.y, p0.z }, { p0.x, p1.y, p0.z }, { 0.0f, 1.0f, 0.0f }, { u0, 1.0f - w1 }, { u1, 1.0f - w1 }, { u1, 1.0f - w0 }, { u0, 1.0f - w0 });
-    add_face(c_block::BOTTOM, { p0.x, p0.y, p0.z }, { p1.x, p0.y, p0.z }, { p1.x, p0.y, p1.z }, { p0.x, p0.y, p1.z }, { 0.0f, -1.0f, 0.0f }, { u0, w0 }, { u1, w0 }, { u1, w1 }, { u0, w1 });
+    add_face(c_block::e_material::UPPER, { p0.x, p1.y, p0.z }, { p1.x, p1.y, p0.z }, { p1.x, p1.y, p1.z }, { p0.x, p1.y, p1.z }, { 0.0f, 1.0f, 0.0f }, { u0, 1.0f - w0 }, { u1, 1.0f - w0 }, { u1, 1.0f - w1 }, { u0, 1.0f - w1 });
+    add_face(c_block::e_material::BOTTOM, { p0.x, p0.y, p1.z }, { p1.x, p0.y, p1.z }, { p1.x, p0.y, p0.z }, { p0.x, p0.y, p0.z }, { 0.0f, -1.0f, 0.0f }, { u0, w1 }, { u1, w1 }, { u1, w0 }, { u0, w0 });
 
-    add_face(c_block::SIDE, { p0.x, p0.y, p1.z }, { p1.x, p0.y, p1.z }, { p1.x, p1.y, p1.z }, { p0.x, p1.y, p1.z }, { 0.0f, 0.0f, 1.0f }, { u0, v0 }, { u1, v0 }, { u1, v1 }, { u0, v1 });
-    add_face(c_block::SIDE, { p1.x, p0.y, p0.z }, { p0.x, p0.y, p0.z }, { p0.x, p1.y, p0.z }, { p1.x, p1.y, p0.z }, { 0.0f, 0.0f, -1.0f }, { 1.0f - u1, v0 }, { 1.0f - u0, v0 }, { 1.0f - u0, v1 }, { 1.0f - u1, v1 });
+    add_face(c_block::e_material::SIDE, { p0.x, p0.y, p1.z }, { p1.x, p0.y, p1.z }, { p1.x, p1.y, p1.z }, { p0.x, p1.y, p1.z }, { 0.0f, 0.0f, 1.0f }, { u0, v0 }, { u1, v0 }, { u1, v1 }, { u0, v1 });
+    add_face(c_block::e_material::SIDE, { p1.x, p0.y, p0.z }, { p0.x, p0.y, p0.z }, { p0.x, p1.y, p0.z }, { p1.x, p1.y, p0.z }, { 0.0f, 0.0f, -1.0f }, { 1.0f - u1, v0 }, { 1.0f - u0, v0 }, { 1.0f - u0, v1 }, { 1.0f - u1, v1 });
 
     if (model->meshes.empty()) {
         delete model;

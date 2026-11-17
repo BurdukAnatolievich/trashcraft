@@ -39,7 +39,7 @@ void c_hud_overlay::render(float scale)
     int total_hearts = static_cast<int>(std::ceil(local->max_health * 0.5f));
     int current_hp = static_cast<int>(std::ceil(local->health));
 
-    for (int i = 0; i < total_hearts; ++i) {
+    for (int i = 0; i < total_hearts; i++) {
         float hx = hotbar_x + i * 8.0f * scale;
         g_menu_draw->sprite(mc_sprites::HEART_BG, hx, status_y, scale);
 
@@ -50,5 +50,9 @@ void c_hud_overlay::render(float scale)
         else if (heart_hp == 1) {
             g_menu_draw->sprite(mc_sprites::HEART_HALF, hx, status_y, scale);
         }
+    }
+
+    for (int i = 0; i < INVENTORY_BAR_SIZE; i++) {
+		g_menu_draw->draw_items(local->inventory.get_hotbar_item(i), hotbar_x + 3.0f * scale + i * 20.0f * scale, hotbar_y + 3.0f * scale, scale);
     }
 }

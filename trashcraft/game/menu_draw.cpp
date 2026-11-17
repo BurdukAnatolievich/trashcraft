@@ -72,8 +72,8 @@ c_menu_draw::rect_size_t c_menu_draw::text_size(const std::string& label, float 
     if (label.empty())
         return { 0.0f, 0.0f };
 
-    ImVec2 size = ImGui::CalcTextSize(label.c_str());
-	return { size.x * scale, size.y * scale };
+    ImVec2 size = ImGui::GetFont()->CalcTextSizeA(9.0f * scale, FLT_MAX, 0.0f, label.c_str());
+	return { size.x, size.y };
 }
 
 void c_menu_draw::sprite(c_texture* texture, float x, float y, float u, float v, float w, float h, float scale, ImU32 color)
@@ -133,5 +133,35 @@ void c_menu_draw::draw_iso_block(c_block* block, float x, float y, float size)
     if (tex_side) {
         ImGui::GetBackgroundDrawList()->AddImageQuad((ImTextureID)(intptr_t)tex_side->id, top_l, top_b, bot_b, bot_l, { 0, 0 }, { 1, 0 }, { 1, 1 }, { 0, 1 }, IM_COL32(205, 205, 205, 255));
         ImGui::GetBackgroundDrawList()->AddImageQuad((ImTextureID)(intptr_t)tex_side->id, top_b, top_r, bot_r, bot_b, { 0, 0 }, { 1, 0 }, { 1, 1 }, { 0, 1 }, IM_COL32(155, 155, 155, 255));
+    }
+}
+
+void c_menu_draw::draw_items(c_inventory_item* item, float x, float y, float scale)
+{
+    if (!item) {
+        return;
+    }
+
+    c_item* item_ptr = item->get_ptr();
+    if (!item_ptr) {
+        return;
+    }
+
+	float size = 16.0f * scale;
+    if (item_ptr->type == c_item::e_type::BLOCK) {
+        draw_iso_block(static_cast<c_block*>(item_ptr), x, y, size);
+    }
+    else if (item_ptr->item_material) {
+        sprite(item_ptr->item_material, x, y, 0.0f, 0.0f, 1.0f, 1.0f, scale);
+    }
+
+    if (item->count > 1) {
+        std::string count_str = std::to_string(item->count);
+
+        c_menu_draw::rect_size_t text_size = g_menu_draw->text_size(count_str, scale);
+        float tx = std::floor(x + size + 1.0f * scale - text_size.width);
+        float ty = std::floor(y + size + 1.0f * scale - text_size.height);
+
+        g_menu_draw->text(count_str, tx, ty, scale);
     }
 }
