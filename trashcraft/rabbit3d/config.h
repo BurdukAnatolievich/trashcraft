@@ -14,6 +14,7 @@ constexpr int MAX_RENDER_DIST = 16;
 constexpr int MAX_RENDER_DIST_R = MAX_RENDER_DIST / 2;
 
 constexpr int INVENTORY_BAR_COUNT = 3;
+constexpr int INVENTORY_BAR_SIZE = 9;
 
 class c_rabbit3d_config
 {

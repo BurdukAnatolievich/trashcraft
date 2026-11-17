@@ -186,6 +186,7 @@
     <ClCompile Include="game\global_vars.cpp" />
     <ClCompile Include="game\gui\debug_overlay.cpp" />
     <ClCompile Include="game\gui\hud.cpp" />
+    <ClCompile Include="game\gui\inventory_overlay.cpp" />
     <ClCompile Include="game\gui\main_menu.cpp" />
     <ClCompile Include="game\input.cpp" />
     <ClCompile Include="game\inventory.cpp" />
@@ -537,6 +538,7 @@
     <ClInclude Include="game\gui\debug_overlay.h" />
     <ClInclude Include="game\gui\gui_screen.h" />
     <ClInclude Include="game\gui\hud.h" />
+    <ClInclude Include="game\gui\inventory_overlay.h" />
     <ClInclude Include="game\gui\main_menu.h" />
     <ClInclude Include="game\gui\overlay.h" />
     <ClInclude Include="game\input.h" />

@@ -1,8 +1,7 @@
 #include "hud.h"
-
-#include <menu.h>
-#include <global_vars.h>
-#include <entity/entity_list.h>
+#include "menu.h"
+#include "global_vars.h"
+#include "entity/entity_list.h"
 
 #include <algorithm>
 
@@ -34,7 +33,7 @@ void c_hud_overlay::render(float scale)
 
     g_menu_draw->sprite(mc_sprites::HOTBAR, hotbar_x, hotbar_y, scale);
 
-    int slot = std::clamp(g_global_vars->current_inventory_slot, 0, 8);
+    int slot = local->inventory.current_hotbar_slot;
     g_menu_draw->sprite(mc_sprites::HOTBAR_SELECTOR, hotbar_x - 1.0f * scale + (slot * 20.0f * scale), hotbar_y - 1.0f * scale, scale);
 
     int total_hearts = static_cast<int>(std::ceil(local->max_health * 0.5f));

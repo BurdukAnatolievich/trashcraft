@@ -23,7 +23,7 @@ public:
     c_scene* scene = nullptr;
     c_camera* camera = nullptr;
 
-    int current_inventory_slot = 0;
+    bool in_game = false;
 
     std::map<std::string, c_item*> items;
     std::map<std::string, c_crafting_recipe*> recipes;
@@ -31,26 +31,21 @@ public:
     c_item* mapped_items[16384] = { nullptr };
     bool mapped_transparency[16384] = { false };
 
-    bool in_game = false;
-
     int world_id = -1;
     std::string world_name = "";
 
     void initialize_blocks();
     void initialize_items();
-
     void initialize_recipes();
 
     c_inventory_item* give_item(c_item* item, int count = 1);
     void drop_item(c_inventory_item* item, glm::vec3 origin = glm::vec3(FLT_MAX), glm::vec3 up = glm::vec3(FLT_MAX));
-
     bool put_item(c_inventory_item* item);
 
     void start();
     void finish();
 
     void respawn();
-
     void map_items();
 };
 

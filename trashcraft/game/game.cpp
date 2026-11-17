@@ -89,7 +89,6 @@ void c_game::update()
     g_time->update();
 
     if (!g_time->can_run_update()) {
-        //g_time->sleep_update();
         return;
     }
 
@@ -123,19 +122,14 @@ void c_game::update()
     g_world->update_chunks(true, true);
 
     g_time->ran_update();
-    //g_time->sleep_update();
 }
 
 void c_game::finish()
 {
+    g_render->set_active(false);
     g_global_vars->in_game = false;
 
-    g_render->set_active(false);
-
     g_world->clear_world();
-
-    g_global_vars->current_inventory_slot = 0;
-    std::memset(g_global_vars->inventory_items, 0, sizeof(c_inventory_item) * 4 * 9);
 
     g_time->finish();
     g_global_vars->finish();

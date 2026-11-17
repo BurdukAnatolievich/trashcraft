@@ -272,7 +272,7 @@ bool c_crafting_recipe::check_crafting_recipe(c_crafting_recipe::e_grid_type gri
 
 bool c_crafting_recipe::can_be_crafted()
 {
-    e_grid_type grid = get_grid_type();
+    /*e_grid_type grid = get_grid_type();
     e_grid_type inventory_grid = g_global_vars->crafting_grid;
 
     bool matching_type = inventory_grid >= grid;
@@ -293,23 +293,12 @@ bool c_crafting_recipe::can_be_crafted()
         }
     }
 
-    return false;
+    return false;*/
 }
 
 void c_crafting_recipe::process_crafting()
 {
-    //c_inventory_item* item = &g_global_vars->crafting_grid_items[e_crafting_grid_bar::C_BAR_2][e_crafting_grid_bar::C_PRODUCT];
-    //if (!item)
-    //    return;
-
-    //item->item_data.reset();
-    //item->item_data.item = g_global_vars->items[product_item_id];
-    //if (!item->item_data.item)
-    //    return;
-
-    //item->count = std::clamp(product_item_count, 1, item->item_data.item->max_count);
-
-    //g_global_vars->current_crafting_recipe = this;
+    
 }
 
 void c_crafting_recipe::on_take_item()

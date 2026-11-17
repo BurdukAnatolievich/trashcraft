@@ -17,6 +17,7 @@ void c_input::initialize()
     key_bindings[BIND_MOVE_LEFT] = { ImGuiKey_A, "lang_input_move_left", 0 };
     key_bindings[BIND_JUMP] = { ImGuiKey_Space, "lang_input_move_jump", 0 };
     key_bindings[BIND_SPRINT] = { ImGuiKey_LeftCtrl, "lang_input_move_sprint", 0, };
+    key_bindings[BIND_INVENTORY] = { ImGuiKey_E, "lang_input_open_inventory", 0 };
 
     key_bindings[BIND_ATTACK] = { ImGuiKey_MouseLeft, "lang_input_attack", 0 };
     key_bindings[BIND_USE] = { ImGuiKey_MouseRight, "lang_input_use", 0 };
@@ -90,16 +91,11 @@ void c_input::handle_player_input()
         }
 
         if (mouse_scroll < 0.0f)
-            g_global_vars->current_inventory_slot++;
+            player->inventory.update_hotbar(1);
         if (mouse_scroll > 0.0f)
-            g_global_vars->current_inventory_slot--;
+            player->inventory.update_hotbar(-1);
 
         mouse_scroll = 0.0f;
-
-        if (g_global_vars->current_inventory_slot > 8)
-			g_global_vars->current_inventory_slot = 0;
-        if (g_global_vars->current_inventory_slot < 0)
-			g_global_vars->current_inventory_slot = 8;
     }
 }
 

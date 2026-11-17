@@ -90,7 +90,7 @@ void c_player::attack()
         return;
     }
 
-    c_inventory_item* inv_item = &g_global_vars->inventory_items[e_inventory_bar::BAR_HOTBAR][g_global_vars->current_inventory_slot];
+    c_inventory_item* inv_item = inventory.get_hotbar_item();
     if (!inv_item) {
         return;
     }
@@ -174,7 +174,7 @@ void c_player::interact()
         return;
     }
 
-    c_inventory_item* inv_item = &g_global_vars->inventory_items[e_inventory_bar::BAR_HOTBAR][g_global_vars->current_inventory_slot];
+    c_inventory_item* inv_item = inventory.get_hotbar_item();
     if (!inv_item) {
         return;
     }
@@ -246,7 +246,7 @@ void c_player::update_looking_at()
 
 void c_player::update_held_item()
 {
-    held_item = g_global_vars->inventory_items[e_inventory_bar::BAR_HOTBAR][g_global_vars->current_inventory_slot].get_ptr();
+    held_item = inventory.get_hotbar_item()->get_ptr();
 
     if (held_item != last_held_item) {
         if (held_item_model) {
