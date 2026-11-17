@@ -64,7 +64,7 @@ public:
     void initialize();
 
     bool button(const std::string& label, float x, float y, float w, float h, float scale = 1.0f, bool disabled = false);
-    void text(const std::string& label, float x, float y, float scale = 1.0f, ImU32 color = IM_COL32_WHITE);
+    void text(const std::string& label, float x, float y, float scale = 1.0f, bool shadow = true, ImU32 color = IM_COL32_WHITE);
 
     rect_size_t screen_size();
     rect_size_t text_size(const std::string& label, float scale = 1.0f);

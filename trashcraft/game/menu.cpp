@@ -2,6 +2,8 @@
 #include "input.h"
 #include "game.h"
 
+#include "gui/inventory_screen.h"
+
 #include <rabbit3d.h>
 
 #include <imgui_internal.h>
@@ -19,6 +21,18 @@ void c_ui_manager::on_escape_pressed()
     }
     else {
         //push_screen(new c_pause_screen());
+    }
+}
+
+void c_ui_manager::update()
+{
+    c_gui_screen* active = get_active_screen();
+    if (active) {
+        active->update();
+    }
+    else {
+        if (g_input->is_bind_pressed(BIND_INVENTORY))
+            g_ui_manager->push_screen(new c_inventory_screen());
     }
 }
 
@@ -83,6 +97,9 @@ void c_ui_manager::process_pending_actions()
 
 void c_ui_manager::update_cursor_state() 
 {
-    bool unlock_mouse = has_open_screen();
-    // g_window->set_cursor_locked(!unlock_mouse);
+    bool lock_mouse = has_open_screen();
+    if (lock_mouse)
+        g_input->lock();
+    else
+        g_input->unlock();
 }

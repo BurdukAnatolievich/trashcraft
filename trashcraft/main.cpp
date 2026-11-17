@@ -21,6 +21,8 @@
 #include <save.h>
 #include <multithread.h>
 
+#include "gui/inventory_screen.h"
+
 
 //void game_logic_thread()
 //{
@@ -105,6 +107,10 @@ int main(int, char**)
         }
 
         g_ui_manager->render();
+        g_ui_manager->update();
+
+        if (g_input->is_key_pressed(ImGuiKey_Escape))
+            g_ui_manager->on_escape_pressed();
 
         if (show_world_generator_debug)
         {

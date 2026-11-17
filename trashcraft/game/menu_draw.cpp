@@ -45,19 +45,19 @@ bool c_menu_draw::button(const std::string& label, float x, float y, float w, fl
     return clicked;
 }
 
-void c_menu_draw::text(const std::string& label, float x, float y, float scale, ImU32 color)
+void c_menu_draw::text(const std::string& label, float x, float y, float scale, bool shadow, ImU32 color)
 {
     if (label.empty())
         return;
 
-    ImU32 r = ((color >> IM_COL32_R_SHIFT) & 0xFF) >> 2;
-    ImU32 g = ((color >> IM_COL32_G_SHIFT) & 0xFF) >> 2;
-    ImU32 b = ((color >> IM_COL32_B_SHIFT) & 0xFF) >> 2;
-    ImU32 a = (color >> IM_COL32_A_SHIFT) & 0xFF;
-    ImU32 shadow_color = IM_COL32(r, g, b, a);
-
     ImFont* font = ImGui::GetFont();
-    ImGui::GetBackgroundDrawList()->AddText(font, 9.0f * scale, ImVec2(x + scale, y + scale), shadow_color, label.c_str());
+    if (shadow) {
+        ImU32 r = ((color >> IM_COL32_R_SHIFT) & 0xFF) >> 2;
+        ImU32 g = ((color >> IM_COL32_G_SHIFT) & 0xFF) >> 2;
+        ImU32 b = ((color >> IM_COL32_B_SHIFT) & 0xFF) >> 2;
+        ImU32 a = (color >> IM_COL32_A_SHIFT) & 0xFF;
+        ImGui::GetBackgroundDrawList()->AddText(font, 9.0f * scale, ImVec2(x + scale, y + scale), IM_COL32(r, g, b, a), label.c_str());
+    }
     ImGui::GetBackgroundDrawList()->AddText(font, 9.0f * scale, ImVec2(x, y), color, label.c_str());
 }
 

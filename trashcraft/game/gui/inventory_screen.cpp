@@ -7,11 +7,9 @@
 
 void c_inventory_screen::update()
 {
-    c_player* local = g_global_vars->local_player;
-    if (!local) {
-        return;
-    }
-
+    if (g_input->is_bind_pressed(BIND_INVENTORY)) {
+        g_ui_manager->pop_screen();
+	}
 }
 
 void c_inventory_screen::handle_slot_click(c_inventory* inventory, slot_entry_t& slot, bool right_click)
@@ -193,7 +191,7 @@ void c_inventory_screen::render(float scale)
     float inv_y = std::floor((display.height - inv_h) * 0.5f);
 
     g_menu_draw->sprite(mc_sprites::INVENTORY_BG, inv_x, inv_y, scale);
-    g_menu_draw->text("lang_inventory_crafting", std::floor(inv_x + 97.0f * scale), std::floor(inv_y + 8.0f * scale), scale, IM_COL32(64, 64, 64, 255));
+    g_menu_draw->text("Crafting", std::floor(inv_x + 97.0f * scale), std::floor(inv_y + 8.0f * scale), scale, false, IM_COL32(64, 64, 64, 255));
 
     slot_entry_t slots[INVENTORY_BAR_SIZE * (INVENTORY_BAR_COUNT + 1) + 4 + 1];
     int count = build_slots(&local->inventory, slots);
