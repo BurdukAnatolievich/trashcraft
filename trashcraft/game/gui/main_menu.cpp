@@ -25,23 +25,28 @@ void c_main_menu::render(float scale)
     float btn_x = cx - btn_w * 0.5f;
     float start_y = display.y * 0.25f + 48.0f * scale;
 
-    if (g_menu_draw->button("Singleplayer", btn_x, start_y, btn_w, btn_h, scale)) {
+    if (g_menu_draw->button("lang_main_menu_singleplayer", btn_x, start_y, btn_w, btn_h, scale)) {
         g_game->start();
         g_ui_manager->pop_screen();
     }
 
-    if (g_menu_draw->button("Mods", btn_x, start_y + 24.0f * scale, btn_w, btn_h, scale)) {
+    if (g_menu_draw->button("lang_main_menu_mods", btn_x, start_y + 24.0f * scale, btn_w, btn_h, scale)) {
 
     }
 
     float half_w = 98.0f * scale;
     float bottom_btn_y = start_y + 72.0f * scale;
 
-    if (g_menu_draw->button("About", btn_x, bottom_btn_y, half_w, btn_h, scale)) {
+    if (g_menu_draw->button("lang_main_menu_about", btn_x, bottom_btn_y, half_w, btn_h, scale)) {
 
     }
 
-    if (g_menu_draw->button("Quit", btn_x + 102.0f * scale, bottom_btn_y, half_w, btn_h, scale)) {
+    if (g_menu_draw->button("lang_main_menu_quit", btn_x + 102.0f * scale, bottom_btn_y, half_w, btn_h, scale)) {
 
     }
+
+    ImDrawList* draw = ImGui::GetBackgroundDrawList();
+    float footer_y = display.y - 12.0f * scale;
+
+	g_menu_draw->text("Trashcraft Alpha v" + std::string(TRASHCRAFT_VERSION_STRING), 10.0f, footer_y, scale);
 }

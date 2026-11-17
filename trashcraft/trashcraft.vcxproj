@@ -85,8 +85,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
-    <IncludePath>$(ProjectDir)/game/;$(ProjectDir)/rabbit3d/;$(ProjectDir)/dependencies/stb/;$(ProjectDir)/dependencies/multithreading/;$(ProjectDir)/dependencies/imgui/;$(ProjectDir)/dependencies/perlin_noise/;$(ProjectDir)/dependencies/obj/;$(ProjectDir)/dependencies/glm/;$(ProjectDir)/dependencies/bass/include/;$(ProjectDir)/dependencies/glfw/include/;$(ProjectDir)/dependencies/glew/include/;$(ProjectDir)/dependencies/;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)/dependencies/bass/lib/;$(ProjectDir)/dependencies/glfw/lib/;$(ProjectDir)/dependencies/glew/lib/;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)/game/;$(ProjectDir)/rabbit3d/;$(ProjectDir)/dependencies/stb/;$(ProjectDir)/dependencies/multithreading/;$(ProjectDir)/dependencies/imgui/;$(ProjectDir)/dependencies/perlin_noise/;$(ProjectDir)/dependencies/obj/;$(ProjectDir)/dependencies/glm/;$(ProjectDir)/dependencies/freetype/include/;$(ProjectDir)/dependencies/bass/include/;$(ProjectDir)/dependencies/glfw/include/;$(ProjectDir)/dependencies/glew/include/;$(ProjectDir)/dependencies/;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)/dependencies/bass/lib/;$(ProjectDir)/dependencies/freetype/lib/;$(ProjectDir)/dependencies/glfw/lib/;$(ProjectDir)/dependencies/glew/lib/;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -150,7 +150,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>NOMINMAX;GLM_ENABLE_EXPERIMENTAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;IMGUI_DEFINE_MATH_OPERATORS;GLM_ENABLE_EXPERIMENTAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -168,6 +168,7 @@
     <ClCompile Include="dependencies\imgui\imgui.cpp" />
     <ClCompile Include="dependencies\imgui\imgui_demo.cpp" />
     <ClCompile Include="dependencies\imgui\imgui_draw.cpp" />
+    <ClCompile Include="dependencies\imgui\imgui_freetype.cpp" />
     <ClCompile Include="dependencies\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="dependencies\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="dependencies\imgui\imgui_stdlib.cpp" />
@@ -514,6 +515,7 @@
     <ClInclude Include="dependencies\glm\vector_relational.hpp" />
     <ClInclude Include="dependencies\imgui\imconfig.h" />
     <ClInclude Include="dependencies\imgui\imgui.h" />
+    <ClInclude Include="dependencies\imgui\imgui_freetype.h" />
     <ClInclude Include="dependencies\imgui\imgui_impl_glfw.h" />
     <ClInclude Include="dependencies\imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="dependencies\imgui\imgui_internal.h" />
@@ -709,6 +711,7 @@
   </ItemGroup>
   <ItemGroup>
     <Library Include="dependencies\bass\lib\bass.lib" />
+    <Library Include="dependencies\freetype\lib\freetype.lib" />
     <Library Include="dependencies\glew\lib\glew32s.lib" />
     <Library Include="dependencies\glfw\lib\glfw3.lib" />
   </ItemGroup>

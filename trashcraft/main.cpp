@@ -133,9 +133,9 @@ int main(int, char**)
                 debug_info << "\nHealth: " << std::dec << g_global_vars->local_player->health << "\n";
             }
 
-            ImVec2 text_size = ImGui::CalcTextSize(debug_info.str().c_str());
+            ImVec2 text_size = ImGui::GetFont()->CalcTextSizeA(18.0f, FLT_MAX, 0.0f, debug_info.str().c_str());
             ImGui::GetForegroundDrawList()->AddRectFilled(ImVec2(0, 0), text_size + ImVec2(20, 10), ImColor(20, 20, 20, 120));
-            ImGui::GetForegroundDrawList()->AddText(ImVec2(10.0f, 5.0f), ImColor(255, 255, 255), debug_info.str().c_str());
+            ImGui::GetForegroundDrawList()->AddText(ImGui::GetFont(), 18.0f, ImVec2(10.0f, 5.0f), ImColor(255, 255, 255), debug_info.str().c_str());
 
             static float noise[1024][1024];
             static siv::PerlinNoise noi;

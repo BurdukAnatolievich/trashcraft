@@ -4,6 +4,7 @@
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
+#include <imgui_freetype.h>
 
 c_menu_draw* g_menu_draw = new c_menu_draw;
 
@@ -15,13 +16,9 @@ void c_menu_draw::initialize()
     ImGui::GetIO().IniFilename = NULL;
 
     ImFontConfig cfg;
-    cfg.OversampleH = cfg.OversampleV = 1;
-    cfg.PixelSnapH = true;
+	cfg.FontBuilderFlags = ImGuiFreeTypeBuilderFlags_Monochrome;
 
-    ImGui::GetStyle().AntiAliasedLinesUseTex = false;
-    ImGui::GetIO().Fonts->Flags |= ImFontAtlasFlags_NoBakedLines;
-
-    ImGui::GetIO().Fonts->AddFontFromFileTTF("./fonts/GUI.ttf", 18.0f, &cfg, ImGui::GetIO().Fonts->GetGlyphRangesCyrillic());
+    ImGui::GetIO().Fonts->AddFontFromFileTTF("./fonts/GUI.ttf", 36.0f, &cfg, ImGui::GetIO().Fonts->GetGlyphRangesCyrillic());
 }
 
 bool c_menu_draw::button(const std::string& label, float x, float y, float w, float h, float scale, bool disabled)
