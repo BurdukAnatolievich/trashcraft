@@ -160,7 +160,7 @@
     <ClCompile Include="game\inventory.cpp">
       <Filter>sources</Filter>
     </ClCompile>
-    <ClCompile Include="game\gui\inventory_overlay.cpp">
+    <ClCompile Include="game\gui\inventory_screen.cpp">
       <Filter>sources</Filter>
     </ClCompile>
     <ClCompile Include="dependencies\imgui\imgui_freetype.cpp">
@@ -514,7 +514,7 @@
     <ClInclude Include="game\gui\hud.h" />
     <ClInclude Include="rabbit3d\memory\pool.h" />
     <ClInclude Include="game\inventory.h" />
-    <ClInclude Include="game\gui\inventory_overlay.h" />
+    <ClInclude Include="game\gui\inventory_screen.h" />
     <ClInclude Include="dependencies\imgui\imgui_freetype.h" />
   </ItemGroup>
   <ItemGroup>

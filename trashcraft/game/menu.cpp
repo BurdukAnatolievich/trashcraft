@@ -28,7 +28,7 @@ void c_ui_manager::render()
     if (display.x <= 0 || display.y <= 0)
         return;
 
-    float scale = 2;
+    float scale = 2.0f;
 
     c_gui_screen* active = get_active_screen();
 
@@ -41,6 +41,14 @@ void c_ui_manager::render()
     }
 
     if (active) {
+        constexpr ImGuiKey mouse_keys[] = { ImGuiKey_MouseLeft, ImGuiKey_MouseRight, ImGuiKey_MouseMiddle };
+        for (ImGuiKey btn : mouse_keys) {
+            if (g_input->is_key_pressed(btn)) { 
+				glm::vec2 mouse_pos = g_input->get_mouse_position();
+                active->on_mouse_click(btn, mouse_pos.x, mouse_pos.y);
+            }
+        }
+
         if (!active->is_full_screen()) {
             ImGui::GetBackgroundDrawList()->AddRectFilled(
                 ImVec2(0, 0), display, IM_COL32(0, 0, 0, 140)

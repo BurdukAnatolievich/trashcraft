@@ -61,6 +61,21 @@ void c_menu_draw::text(const std::string& label, float x, float y, float scale, 
     ImGui::GetBackgroundDrawList()->AddText(font, 9.0f * scale, ImVec2(x, y), color, label.c_str());
 }
 
+c_menu_draw::rect_size_t c_menu_draw::screen_size()
+{
+    ImVec2 size = ImGui::GetIO().DisplaySize;
+    return { size.x, size.y };
+}
+
+c_menu_draw::rect_size_t c_menu_draw::text_size(const std::string& label, float scale)
+{
+    if (label.empty())
+        return { 0.0f, 0.0f };
+
+    ImVec2 size = ImGui::CalcTextSize(label.c_str());
+	return { size.x * scale, size.y * scale };
+}
+
 void c_menu_draw::sprite(c_texture* texture, float x, float y, float u, float v, float w, float h, float scale, ImU32 color)
 {
     if (!texture) {

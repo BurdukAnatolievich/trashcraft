@@ -33,6 +33,13 @@ namespace mc_sprites {
     constexpr gui_sprite_t TITLE_MINE = { "title_logo", 0,  0, 155, 44 };
     constexpr gui_sprite_t TITLE_CRAFT = { "title_logo", 0, 45, 155, 44 };
 
+    constexpr gui_sprite_t INVENTORY_BG = { "inventory", 0, 0, 176, 166 };
+    constexpr gui_sprite_t CRAFTING_TABLE_BG = { "crafting_table", 0, 0, 176, 166 };
+
+    constexpr gui_sprite_t FURNACE_BG = { "furnace", 0, 0, 176, 166 };
+    constexpr gui_sprite_t FURNACE_FLAME = { "furnace", 176, 0, 14, 14 };
+    constexpr gui_sprite_t FURNACE_ARROW = { "furnace", 176, 14, 24, 17 };
+
     constexpr gui_sprite_t CROSSHAIR = { "icons", 0, 0, 16, 16 };
     constexpr gui_sprite_t HEART_BG = { "icons", 16, 0, 9, 9 };
     constexpr gui_sprite_t HEART_FULL = { "icons", 52, 0, 9, 9 };
@@ -50,10 +57,17 @@ namespace mc_sprites {
 class c_menu_draw
 {
 public:
+    struct rect_size_t {
+        float width = 0.0f, height = 0.0f;
+    };
+
     void initialize();
 
     bool button(const std::string& label, float x, float y, float w, float h, float scale = 1.0f, bool disabled = false);
     void text(const std::string& label, float x, float y, float scale = 1.0f, ImU32 color = IM_COL32_WHITE);
+
+    rect_size_t screen_size();
+    rect_size_t text_size(const std::string& label, float scale = 1.0f);
 
     void sprite(c_texture* texture, float x, float y, float u, float v, float w, float h, float scale = 1.0f, ImU32 color = IM_COL32_WHITE);
     void sprite(const std::string& name, float x, float y, float u, float v, float w, float h, float scale = 1.0f, ImU32 color = IM_COL32_WHITE);
@@ -64,9 +78,9 @@ public:
 
 class c_ui_manager {
 public:
-	c_ui_manager() {
+    c_ui_manager() {
 
-	}
+    }
 
     ~c_ui_manager() {
         for (c_gui_screen* screen : screen_stack) {
@@ -99,6 +113,7 @@ public:
     }
 
     void on_escape_pressed();
+    void update();
     void render();
     void process_pending_actions();
     void update_cursor_state();

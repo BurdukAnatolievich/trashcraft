@@ -17,9 +17,9 @@ void c_hud_overlay::render(float scale)
         return;
     }
 
-    ImVec2 display = ImGui::GetIO().DisplaySize;
-    float cx = display.x * 0.5f;
-    float cy = display.y * 0.5f;
+    c_menu_draw::rect_size_t display = g_menu_draw->screen_size();
+    float cx = display.width * 0.5f;
+    float cy = display.height * 0.5f;
 
     g_menu_draw->sprite(mc_sprites::CROSSHAIR, cx - 8.0f * scale, cy - 8.0f * scale, scale);
 
@@ -27,7 +27,7 @@ void c_hud_overlay::render(float scale)
     float hotbar_h = 22.0f * scale;
 
     float hotbar_x = cx - hotbar_w * 0.5f;
-    float hotbar_y = display.y - hotbar_h;
+    float hotbar_y = display.height - hotbar_h;
 
     float status_y = hotbar_y - 10.0f * scale;
 
