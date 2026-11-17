@@ -4,6 +4,7 @@
 #include <mutex>
 
 #include "save.h"
+#include "config.h"
 
 #include <perlin_noise/PerlinNoise.hpp>
 

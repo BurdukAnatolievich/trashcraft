@@ -243,15 +243,15 @@ void c_global_vars::start()
     g_event_manager->initialize_listeners();
 
     g_global_vars->local_player = new c_player;
-    g_global_vars->local_player->bind_camera(camera);
 
-    c_model* mdl = g_model_manager->find_model_by_name("local_mdl");
-    g_global_vars->local_player->set_model(mdl);
+	c_player* player = g_global_vars->local_player;
+    player->bind_camera(camera);
+    player->set_model(g_model_manager->get_model_instance("local_mdl"));
 
-    g_global_vars->local_player->name = "Notch";
-    g_global_vars->local_player->respawn();
+    std::memcpy(player->name, "Steve", sizeof("Steve"));
+    player->respawn();
 
-    g_entity_list->add_entity(g_global_vars->local_player);
+    g_entity_list->add_entity(player);
 }
 
 void c_global_vars::finish()

@@ -146,83 +146,13 @@ void c_world_save::load_chunk(std::string chunk_id)
     chunk_file.read((char*)save_chunk, sizeof(save_chunk_t));
     chunk_file.close();
 
-    //world_chunk_t* chunk = &g_world->chunks.emplace_back();
-    //chunk->position = save_chunk->position;
-    //chunk->index = save_chunk->index;
-
-    //for (int x = 0; x < 16; x++)
-    //{
-    //    for (int y = 0; y < 16; y++)
-    //    {
-    //        for (int h = 0; h < 128; h++)
-    //        {
-    //            short block_id = save_chunk->data[h].data[x][y];
-    //            if (block_id == -1)
-    //                continue;
-
-    //            c_block* block = (c_block*)indices_to_item[block_id];
-    //            if (!block || block->type != c_item::e_type::BLOCK)
-    //                continue;
-
-    //            //c_block_data* new_data = nullptr;
-    //            //switch (block->block_type)
-    //            //{
-    //            //case c_block::e_block_type::DEFAULT:
-    //            //    new_data = new c_block_data(block);
-    //            //    break;
-    //            //case c_block::e_block_type::CHEST:
-    //            //    new_data = new c_chest(block);
-    //            //    break;
-    //            //case c_block::e_block_type::DOOR:
-    //            //    new_data = new c_door(block);
-    //            //    break;
-    //            //case c_block::e_block_type::JUKEBOX:
-    //            //    new_data = new c_jukebox(block);
-    //            //    break;
-    //            //}
-
-    //            //chunk->data[h].data[x][y] = new_data;
-    //        }
-    //    }
-    //}
-
-    //chunk->render_data.mesh = new c_mesh("chunk##" + std::to_string(int(chunk->position.x)) + std::to_string(int(chunk->position.y)), chunk->position, &g_texture_manager->texture_atlas);
-    //g_world->create_chunk_scene_objects(chunk);
 
     delete save_chunk;
 }
 
 void c_world_save::save_chunk(world_chunk_t* chunk)
 {
-    //save_chunk_t* save_chunk = new save_chunk_t;
-    //std::memset(save_chunk, 0, sizeof(save_chunk_t));
 
-    //save_chunk->index = chunk->index;
-
-    //for (int h = 0; h < WORLD_HEIGHT; h++) {
-    //    for (int x = 0; x < CHUNK_SIZE; x++) {
-    //        for (int y = 0; y < CHUNK_SIZE; y++) {
-    //            //c_block_data* block = chunk->data[h].data[x][y];
-    //            //if (!block || !block->block)
-    //            //{
-    //            //    save_chunk->data[h].data[x][y] = -1;
-    //            //    continue;
-    //            //}
-
-    //            //save_chunk->data[h].data[x][y] = item_to_indices[block->block];
-    //        }
-    //    }
-    //}
-
-    //std::string chunk_dir_path = saves_path + g_world->name + "/chunks/" + chunk->render_data.mesh->name + ".tchunk";
-    //std::ofstream chunk_file(chunk_dir_path, std::ios::binary);
-    //if (chunk_file.is_open())
-    //{
-    //    chunk_file.write((char*)save_chunk, sizeof(save_chunk_t));
-    //    chunk_file.close();
-    //}
-
-    //delete save_chunk;
 }
 
 void c_world_save::create_world(const std::string& display_name, const std::string& actual_name)
@@ -239,8 +169,4 @@ void c_world_save::create_world(const std::string& display_name, const std::stri
     g_world->info = &info;
 
     g_world->generate_world(128);
-
-    //save_world();
-
-    //g_world->create_scene_objects();
 }

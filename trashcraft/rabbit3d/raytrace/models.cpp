@@ -2,6 +2,8 @@
 #include "render.h"
 
 #include <item.h>
+#include <block.h>
+
 #include <global_vars.h>
 
 c_model_manager* g_model_manager = new c_model_manager;
@@ -19,7 +21,13 @@ void c_model_manager::initialize_items()
     for (auto& item_ : g_global_vars->items)
     {
         c_item* item = item_.second;
+        if (item->type != c_item::e_type::BLOCK)
+            continue;
+
         create_model_from_item(item);
+
+
+        item->item_model = find_model_by_name(item->name);
     }
 }
 
@@ -190,6 +198,73 @@ bool c_model_manager::create_model_from_texture(const std::string& model_name, c
     return true;
 }
 
+bool c_model_manager::create_model_from_block(c_block* block)
+{
+    if (!block)
+        return false;
+
+    if (models.find(block->name) != models.end())
+        return false;
+
+    c_model* model = new c_model(block->name, glm::vec3(0.0f));
+
+    const glm::vec3 p0 = block->min - glm::vec3(0.5f);
+    const glm::vec3 p1 = block->max - glm::vec3(0.5f);
+
+    const float u0 = block->min.x, u1 = block->max.x;
+    const float v0 = 1.0f - block->min.y, v1 = 1.0f - block->max.y;
+    const float w0 = block->min.z, w1 = block->max.z;
+
+    auto add_face = [&](c_block::e_material mat,
+        const glm::vec3& a, const glm::vec3& b, const glm::vec3& c, const glm::vec3& d,
+        const glm::vec3& normal,
+        const glm::vec2& t0, const glm::vec2& t1, const glm::vec2& t2, const glm::vec2& t3)
+        {
+            c_texture* tex = block->materials[mat];
+            if (!tex)
+                return;
+
+            c_mesh* mesh = nullptr;
+            for (auto& m : model->meshes) {
+                if (m.texture == tex) {
+                    mesh = &m;
+                    break;
+                }
+            }
+
+            if (!mesh) {
+                mesh = &model->meshes.emplace_back();
+                mesh->texture = tex;
+                mesh->should_reassemble_vb = true;
+            }
+
+            mesh->vertices.push_back({ a, normal, t0 });
+            mesh->vertices.push_back({ b, normal, t1 });
+            mesh->vertices.push_back({ c, normal, t2 });
+
+            mesh->vertices.push_back({ c, normal, t2 });
+            mesh->vertices.push_back({ d, normal, t3 });
+            mesh->vertices.push_back({ a, normal, t0 });
+        };
+
+    add_face(c_block::SIDE, { p1.x, p0.y, p1.z }, { p1.x, p0.y, p0.z }, { p1.x, p1.y, p0.z }, { p1.x, p1.y, p1.z }, { 1.0f, 0.0f, 0.0f }, { 1.0f - w1, v0 }, { 1.0f - w0, v0 }, { 1.0f - w0, v1 }, { 1.0f - w1, v1 });
+    add_face(c_block::SIDE, { p0.x, p0.y, p0.z }, { p0.x, p0.y, p1.z }, { p0.x, p1.y, p1.z }, { p0.x, p1.y, p0.z }, { -1.0f, 0.0f, 0.0f }, { w0, v0 }, { w1, v0 }, { w1, v1 }, { w0, v1 });
+
+    add_face(c_block::UPPER, { p0.x, p1.y, p1.z }, { p1.x, p1.y, p1.z }, { p1.x, p1.y, p0.z }, { p0.x, p1.y, p0.z }, { 0.0f, 1.0f, 0.0f }, { u0, 1.0f - w1 }, { u1, 1.0f - w1 }, { u1, 1.0f - w0 }, { u0, 1.0f - w0 });
+    add_face(c_block::BOTTOM, { p0.x, p0.y, p0.z }, { p1.x, p0.y, p0.z }, { p1.x, p0.y, p1.z }, { p0.x, p0.y, p1.z }, { 0.0f, -1.0f, 0.0f }, { u0, w0 }, { u1, w0 }, { u1, w1 }, { u0, w1 });
+
+    add_face(c_block::SIDE, { p0.x, p0.y, p1.z }, { p1.x, p0.y, p1.z }, { p1.x, p1.y, p1.z }, { p0.x, p1.y, p1.z }, { 0.0f, 0.0f, 1.0f }, { u0, v0 }, { u1, v0 }, { u1, v1 }, { u0, v1 });
+    add_face(c_block::SIDE, { p1.x, p0.y, p0.z }, { p0.x, p0.y, p0.z }, { p0.x, p1.y, p0.z }, { p1.x, p1.y, p0.z }, { 0.0f, 0.0f, -1.0f }, { 1.0f - u1, v0 }, { 1.0f - u0, v0 }, { 1.0f - u0, v1 }, { 1.0f - u1, v1 });
+
+    if (model->meshes.empty()) {
+        delete model;
+        return false;
+    }
+
+    models[block->name] = model;
+    return true;
+}
+
 bool c_model_manager::create_model_from_item(c_item* item)
 {
     if (!item) {
@@ -200,8 +275,7 @@ bool c_model_manager::create_model_from_item(c_item* item)
         return create_model_from_texture(item->name, item->item_material);
     }
 
-
-    return false;
+    return create_model_from_block((c_block*)item);
 }
 
 bool c_model_manager::create_player_model(const std::string& model_name, const std::string& texture_id, bool second_layer)

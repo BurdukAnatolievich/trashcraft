@@ -463,6 +463,7 @@ void c_player::update()
     last_view_angle = view_angle;
 
     update_held_item();
+    update_looking_at();
 
     create_move();
     update_relative_pos();
@@ -471,7 +472,6 @@ void c_player::update()
     interact();
 
     update_model();
-    update_looking_at();
 
     //animation_state->update(view_angle.y, view_angle.x);
 

@@ -7,6 +7,7 @@
 #include <GL/glew.h>
 
 class c_item;
+class c_block;
 
 class c_model_manager
 {
@@ -24,6 +25,7 @@ public:
 
     bool create_model_from_file(const std::string& model_name, const std::string& model_path);
     bool create_model_from_texture(const std::string& model_name, c_texture* texture);
+    bool create_model_from_block(c_block* block);
     bool create_model_from_item(c_item* item);
 
     bool create_player_model(const std::string& model_name, const std::string& texture_id, bool second_layer = true);

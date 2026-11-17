@@ -1,14 +1,15 @@
 #pragma once
-#include <vector>
-#include <algorithm>
-#include <mutex>
+#include "config.h"
 
 #include <item.h>
 #include <input.h>
 
-#include <glm.hpp>
 #include <ext.hpp>
 #include <gtx/norm.hpp>
+
+#include <vector>
+#include <algorithm>
+#include <mutex>
 
 class c_camera;
 
@@ -154,10 +155,10 @@ public:
 
     c_player_animation_state* animation_state = nullptr;
 
-    int health = 0;
     bool is_alive = false;
+    int health = 0, max_health = 20;
 
-    std::string name = "";
+    char name[64];
 
     float next_attack_time = 0.0f;
     float next_interaction_time = 0.0f;

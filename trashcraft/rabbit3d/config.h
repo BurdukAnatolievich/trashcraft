@@ -1,6 +1,18 @@
 #pragma once
 #include <glm.hpp>
 
+constexpr int TRASHCRAFT_MAJOR_VERSION = 0;
+constexpr int TRASHCRAFT_MINOR_VERSION = 28;
+constexpr const char* TRASHCRAFT_ITERATION = "Infinite";
+constexpr const char* TRASHCRAFT_VERSION_STRING = "0.28 Infinite";
+constexpr int TRASHCRAFT_WORLD_GENERATOR_VERSION = 2;
+
+constexpr int WORLD_HEIGHT = 256;
+constexpr int CHUNK_SIZE = 16;
+constexpr int CHUNK_SIZE_SHIFT = 4;
+constexpr int MAX_RENDER_DIST = 16;
+constexpr int MAX_RENDER_DIST_R = MAX_RENDER_DIST / 2;
+
 class c_rabbit3d_config
 {
     glm::vec2 screen_resolution = glm::vec2(0.0f);

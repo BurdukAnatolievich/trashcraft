@@ -61,6 +61,7 @@ public:
     std::vector<c_texture*> textures;
 
     void initialize();
+    void create_models();
 
     void set_flip_texture_vertically(bool flip);
 

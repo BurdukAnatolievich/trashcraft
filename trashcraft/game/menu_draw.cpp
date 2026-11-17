@@ -64,9 +64,8 @@ void c_menu_draw::text(const std::string& label, float x, float y, float scale, 
     ImGui::GetBackgroundDrawList()->AddText(font, 9.0f * scale, ImVec2(x, y), color, label.c_str());
 }
 
-void c_menu_draw::sprite(const std::string& name, float x, float y, float u, float v, float w, float h, float scale, ImU32 color)
+void c_menu_draw::sprite(c_texture* texture, float x, float y, float u, float v, float w, float h, float scale, ImU32 color)
 {
-    c_texture* texture = g_texture_manager->find_texture_by_name(name);
     if (!texture) {
         return;
     }
@@ -80,7 +79,47 @@ void c_menu_draw::sprite(const std::string& name, float x, float y, float u, flo
     ImGui::GetBackgroundDrawList()->AddImage((ImTextureID)texture->id, p_min, p_max, uv_min, uv_max, color);
 }
 
+void c_menu_draw::sprite(const std::string& name, float x, float y, float u, float v, float w, float h, float scale, ImU32 color)
+{
+    if (name.empty()) {
+        return;
+    }
+
+    sprite(g_texture_manager->find_texture_by_name(name), x, y, u, v, w, h, scale, color);
+}
+
 void c_menu_draw::sprite(const gui_sprite_t& sprite, float x, float y, float scale, ImU32 color)
 {
     this->sprite(sprite.atlas, x, y, sprite.u, sprite.v, sprite.w, sprite.h, scale, color);
+}
+
+void c_menu_draw::draw_iso_block(c_block* block, float x, float y, float size)
+{
+    ImVec2 center(x + size * 0.5f, y + size * 0.5f);
+
+    float h = size * 0.48f;
+
+    float rx = size * 0.45f;
+    float ry = size * 0.25f;
+
+    ImVec2 top_t(center.x, center.y - h);
+    ImVec2 top_r(center.x + rx, center.y - h + ry);
+    ImVec2 top_b(center.x, center.y - h + ry * 2.0f);
+    ImVec2 top_l(center.x - rx, center.y - h + ry);
+
+    ImVec2 bot_r(center.x + rx, center.y + ry);
+    ImVec2 bot_b(center.x, center.y + ry * 2.0f);
+    ImVec2 bot_l(center.x - rx, center.y + ry);
+
+    c_texture* tex_top = block->materials[c_block::UPPER] ? block->materials[c_block::UPPER] : block->materials[c_block::SIDE];
+    c_texture* tex_side = block->materials[c_block::SIDE];
+
+    if (tex_top) {
+        ImGui::GetBackgroundDrawList()->AddImageQuad((ImTextureID)(intptr_t)tex_top->id, top_l, top_t, top_r, top_b, { 0, 1 }, { 0, 0 }, { 1, 0 }, { 1, 1 }, IM_COL32(255, 255, 255, 255));
+    }
+
+    if (tex_side) {
+        ImGui::GetBackgroundDrawList()->AddImageQuad((ImTextureID)(intptr_t)tex_side->id, top_l, top_b, bot_b, bot_l, { 0, 0 }, { 1, 0 }, { 1, 1 }, { 0, 1 }, IM_COL32(205, 205, 205, 255));
+        ImGui::GetBackgroundDrawList()->AddImageQuad((ImTextureID)(intptr_t)tex_side->id, top_b, top_r, bot_r, bot_b, { 0, 0 }, { 1, 0 }, { 1, 1 }, { 0, 1 }, IM_COL32(155, 155, 155, 255));
+    }
 }

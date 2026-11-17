@@ -6,12 +6,6 @@
 #include "item.h"
 #include <glm.hpp>
 
-#define TRASHCRAFT_MAJOR_VERSION 0
-#define TRASHCRAFT_MINOR_VERSION 27
-#define TRASHCRAFT_ITERATION "Infinite"
-#define TRASHCRAFT_VERSION_STRING "0.27 Infinite"
-#define TRASHCRAFT_WORLD_GENERATOR_VERSION 2
-
 class c_player;
 class c_camera;
 class c_block;

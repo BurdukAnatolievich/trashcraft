@@ -516,7 +516,7 @@ void c_render::render_viewmodel()
         hand = glm::rotate(hand, glm::radians(-45.0f * f1), glm::vec3(0.0f, 1.0f, 0.0f));
     }
 
-    if (held_model && held_item->type == c_item::e_type::ITEM) {
+    if (held_model) {
         hand = glm::translate(hand, glm::vec3(0.07f, 0.20f, 0.07f));
         hand = glm::rotate(hand, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         hand = glm::rotate(hand, glm::radians(25.0f), glm::vec3(0.0f, 0.0f, 1.0f));

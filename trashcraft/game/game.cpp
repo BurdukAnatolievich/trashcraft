@@ -26,6 +26,8 @@ void c_game::initialize()
 
     g_global_vars->map_items();
 
+    g_model_manager->initialize_items();
+
     g_audio_manager->initialize_audio();
     g_audio_manager->initialize_sounds();
 

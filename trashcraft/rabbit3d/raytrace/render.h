@@ -54,6 +54,8 @@ public:
 
     void compile_shaders();
 
+    GLuint bake_model_icon(c_model* model, int size = 64);
+
     void render_cube_outline();
     void render_cube_textured();
 

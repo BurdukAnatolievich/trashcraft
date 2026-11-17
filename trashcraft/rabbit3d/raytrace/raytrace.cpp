@@ -4,6 +4,7 @@
 #include <world.h>
 #include <block.h>
 #include <global_vars.h>
+#include <iostream>
 
 c_raytrace_utils* g_raytrace_utils = new c_raytrace_utils;
 
@@ -53,6 +54,7 @@ bool c_raytrace_utils::voxel_raycast(const glm::vec3& origin, const glm::vec3& d
                 trace.hit_pos = glm::vec3(cur_block);
                 trace.normal = last_normal;
 				trace.distance = current_dist;
+				std::cout << "Hit block: " << block_ptr->name << " at " << cur_block.x << ", " << cur_block.y << ", " << cur_block.z << std::endl;
                 return true;
 			}
         }

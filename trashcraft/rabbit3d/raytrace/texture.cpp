@@ -66,10 +66,9 @@ void c_texture_manager::initialize()
     build_texture_atlas();
 
     // DECALS
-    std::vector<c_texture*> _textures;
-    load_textures_from_directory(_textures, "blocks/destroy/", TEXTURE_CATEGORY_INTERNAL);
-
-    build_texture_atlas(_textures, &decal_atlas);
+    std::vector<c_texture*> temp;
+    load_textures_from_directory(temp, "blocks/destroy/", TEXTURE_CATEGORY_INTERNAL);
+    build_texture_atlas(temp, &decal_atlas);
     
     // ITEMS
 
@@ -82,6 +81,16 @@ void c_texture_manager::initialize()
     // ENTITIES
 
     load_textures_from_directory("entities/", TEXTURE_CATEGORY_ENTITY);
+
+    // 3D MODELS
+    create_models();
+}
+
+void c_texture_manager::create_models()
+{
+    for (const auto& texture : textures) {
+        g_model_manager->create_model_from_texture(texture->name, texture);
+	}
 }
 
 void c_texture_manager::set_flip_texture_vertically(bool flip)

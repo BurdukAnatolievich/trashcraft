@@ -4,6 +4,7 @@
 #include <unordered_map>
 
 #include "item.h"
+#include "block.h"
 #include "save.h"
 
 #include "gui/hud.h"
@@ -54,8 +55,11 @@ public:
     bool button(const std::string& label, float x, float y, float w, float h, float scale = 1.0f, bool disabled = false);
     void text(const std::string& label, float x, float y, float scale = 1.0f, ImU32 color = IM_COL32_WHITE);
 
+    void sprite(c_texture* texture, float x, float y, float u, float v, float w, float h, float scale = 1.0f, ImU32 color = IM_COL32_WHITE);
     void sprite(const std::string& name, float x, float y, float u, float v, float w, float h, float scale = 1.0f, ImU32 color = IM_COL32_WHITE);
     void sprite(const gui_sprite_t& sprite, float x, float y, float scale = 1.0f, ImU32 color = IM_COL32_WHITE);
+
+    void draw_iso_block(c_block* block, float x, float y, float size);
 };
 
 class c_ui_manager {

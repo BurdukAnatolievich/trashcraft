@@ -3,7 +3,7 @@
 #include <deque>
 #include <unordered_map>
 
-#include <glm.hpp>
+#include "config.h"
 
 class c_world;
 class c_item;
