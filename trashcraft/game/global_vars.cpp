@@ -41,13 +41,13 @@ void c_global_vars::initialize_items()
     // ITEMS
 
     new c_item("Stick", "stick", "stick");
-    new c_item("Iron ingot", "iron_ingot", "iron_ingot");
+    new c_item("Iron ingot", "iron_ingot", "ingotIron");
 
     new c_item("Diamond", "diamond", "diamond");
 
     // TOOLS
 
-    new c_tool("Iron pickaxe", "iron_pickaxe", c_tool::e_tool::PICKAXE, 250, 6, "iron_pickaxe");
+    new c_tool("Iron pickaxe", "iron_pickaxe", c_tool::e_tool::PICKAXE, 250, 6, "pickaxeIron");
 
     // RECORDS
 
@@ -99,7 +99,7 @@ void c_global_vars::start()
     std::memcpy(player->name, "Steve", sizeof("Steve"));
     player->respawn();
 
-	player->inventory.items[0] = { g_global_vars->items["cherry_planks"]->numeric_id, 64 };
+	player->inventory.items[0] = { g_global_vars->items["oak_planks"]->numeric_id, 64 };
 
     g_entity_list->add_entity(player);
 }
