@@ -12,4 +12,5 @@ public:
     void render(float scale) override;
 
     bool is_full_screen() const override { return true; };
+    bool can_close_with_esc() const override { return false; };
 };

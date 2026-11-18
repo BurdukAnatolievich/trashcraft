@@ -21,7 +21,7 @@
 #include <save.h>
 #include <multithread.h>
 
-#include "gui/inventory_screen.h"
+#include "gui/survival_inventory.h"
 
 
 //void game_logic_thread()

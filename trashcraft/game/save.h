@@ -17,10 +17,12 @@ public:
         std::string display_name = "";
         std::string actual_name = "";
 
-        std::string chunks_path = "";
+        uint64_t last_played = 0;
 
-        std::vector<std::string> chunks;
-        std::vector<std::string> parsed_info;
+        int game_mode = 0;
+        bool cheats_allowed = false;
+
+        std::unordered_map<std::string, int> game_rules;
     };
 
     struct save_chunk_t
@@ -33,8 +35,8 @@ private:
 public:
     std::deque<world_info_t> worlds;
 
-    std::unordered_map<uint16_t, c_item*> indices_to_item;
-    std::unordered_map<c_item*, uint16_t> item_to_indices;
+    std::unordered_map<uint16_t, c_item*> id_to_item;
+    std::unordered_map<c_item*, uint16_t> item_to_id;
 
     void initialize();
 

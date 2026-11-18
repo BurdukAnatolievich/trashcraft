@@ -25,23 +25,7 @@ void c_world_save::initialize()
         std::ifstream world_info(world_info_path.string());
         if (world_info.is_open())
         {
-            std::vector<std::string> buffer;
-            while (std::getline(world_info, buffer.emplace_back())) {}
 
-            if (buffer.size() >= 2 && buffer.at(0) == "TrashcraftSave" && buffer.at(1)[0] == TRASHCRAFT_WORLD_GENERATOR_VERSION)
-            {
-                int id = worlds.size();
-                worlds.push_back({ buffer.at(2), entry.path().filename().string(), entry.path().string() + "/chunks/", { }, buffer });
-
-                world_info_t& info = worlds.at(id);
-                for (const auto& entry : std::filesystem::directory_iterator(info.chunks_path))
-                {
-                    if (entry.path().extension().string() != ".tchunk")
-                        continue;
-
-                    info.chunks.push_back(entry.path().stem().string());
-                }
-            }
 
             world_info.close();
         }
@@ -54,43 +38,41 @@ void c_world_save::load_world(int id)
         return;
 
     world_info_t& info = worlds.at(id);
-    if (info.parsed_info.empty() || info.parsed_info.size() < 7)
-        return;
 
     g_world->name = info.actual_name;
     g_world->info = &info;
 
-    float x = std::stof(info.parsed_info.at(3));
-    float y = std::stof(info.parsed_info.at(4));
-    float z = std::stof(info.parsed_info.at(5));
+    //float x = std::stof(info.parsed_info.at(3));
+    //float y = std::stof(info.parsed_info.at(4));
+    //float z = std::stof(info.parsed_info.at(5));
 
-    g_global_vars->local_player->set_origin(glm::vec3(x, y, z));
+    //g_global_vars->local_player->set_origin(glm::vec3(x, y, z));
 
-    for (int i = 6; i < info.parsed_info.size(); i++)
-    {
-        std::vector<std::string> splitted_string;
+    //for (int i = 6; i < info.parsed_info.size(); i++)
+    //{
+    //    std::vector<std::string> splitted_string;
 
-        std::stringstream stream;
-        stream << info.parsed_info.at(i);
+    //    std::stringstream stream;
+    //    stream << info.parsed_info.at(i);
 
-        std::string temp;
-        while (std::getline(stream, temp, ':')) { splitted_string.push_back(temp); }
+    //    std::string temp;
+    //    while (std::getline(stream, temp, ':')) { splitted_string.push_back(temp); }
 
-        if (splitted_string.size() != 2)
-            continue;
+    //    if (splitted_string.size() != 2)
+    //        continue;
 
-        short id = std::stoi(splitted_string[0]);
-        indices_to_item[id] = g_global_vars->items[splitted_string[1]];
-    }
+    //    short id = std::stoi(splitted_string[0]);
+    //    indices_to_item[id] = g_global_vars->items[splitted_string[1]];
+    //}
 
-    for (int i = 0; i < info.chunks.size(); i++)
-    {
-        load_chunk(info.chunks.at(i));
-    }
+    //for (int i = 0; i < info.chunks.size(); i++)
+    //{
+    //    load_chunk(info.chunks.at(i));
+    //}
 
     g_world->build_chunks();
 
-    indices_to_item.clear();
+    id_to_item.clear();
 }
 
 void c_world_save::save_world()
@@ -112,7 +94,7 @@ void c_world_save::save_world()
         for (auto& pair : g_global_vars->items)
         {
             world_info << std::dec << item_id << ":" << pair.first << "\n";
-            item_to_indices[pair.second] = item_id;
+            item_to_id[pair.second] = item_id;
             item_id++;
         }
 
@@ -126,7 +108,7 @@ void c_world_save::save_world()
     //    save_chunk(chunk);
     //}
 
-    item_to_indices.clear();
+    item_to_id.clear();
 }
 
 void c_world_save::load_chunk(world_chunk_t* chunk)
@@ -160,10 +142,9 @@ void c_world_save::create_world(const std::string& display_name, const std::stri
     world_info_t& info = worlds.emplace_back();
     info.display_name = display_name;
     info.actual_name = actual_name;
-    info.chunks_path = saves_path + actual_name + "/chunks/";
 
     std::filesystem::create_directory(saves_path + actual_name);
-    std::filesystem::create_directory(info.chunks_path);
+    //std::filesystem::create_directory(info.chunks_path);
 
     g_world->name = actual_name;
     g_world->info = &info;

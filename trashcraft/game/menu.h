@@ -52,6 +52,8 @@ namespace mc_sprites {
     constexpr gui_sprite_t FOOD_HALF = { "icons", 61, 27, 9, 9 };
     constexpr gui_sprite_t XP_BAR_BG = { "icons", 0, 64, 182, 5 };
     constexpr gui_sprite_t XP_BAR_FULL = { "icons", 0, 69, 182, 5 };
+
+    constexpr gui_sprite_t DIRT_BG = { "options_background", 0, 0, 16, 16 };
 }
 
 class c_menu_draw
@@ -73,6 +75,10 @@ public:
     void sprite(const std::string& name, float x, float y, float u, float v, float w, float h, float scale = 1.0f, ImU32 color = IM_COL32_WHITE);
     void sprite(const gui_sprite_t& sprite, float x, float y, float scale = 1.0f, ImU32 color = IM_COL32_WHITE);
 
+    void rect_filled(float x, float y, float w, float h, ImU32 color);
+
+	void dirt_background(float x, float y, float w, float h, float scale = 1.0f, float scroll_y = 0.0f, ImU32 color = IM_COL32_WHITE);
+
     void draw_iso_block(c_block* block, float x, float y, float size);
     void draw_items(c_inventory_item* item, float x, float y, float scale);
 };
@@ -93,6 +99,18 @@ public:
     inline void push_screen(c_gui_screen* screen) {
         if (!screen)
             return;
+        screen_stack.push_back(screen);
+        update_cursor_state();
+    }
+
+    inline void replace_screen(c_gui_screen* screen) {
+        if (!screen)
+            return;
+
+        if (!screen_stack.empty()) {
+            delete screen_stack.back();
+            screen_stack.pop_back();
+        }
         screen_stack.push_back(screen);
         update_cursor_state();
     }

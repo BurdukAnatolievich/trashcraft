@@ -1,4 +1,5 @@
 #include "main_menu.h"
+#include "world_selector.h"
 
 #include <menu.h>
 #include <game.h>
@@ -28,8 +29,7 @@ void c_main_menu::render(float scale)
     float btn_y = display.height * 0.25f + 48.0f * scale;
 
     if (g_menu_draw->button("lang_main_menu_singleplayer", btn_x, btn_y, btn_w, btn_h, scale)) {
-        g_game->start();
-        g_ui_manager->pop_screen();
+		g_ui_manager->push_screen(new c_world_selector());
     }
 
     if (g_menu_draw->button("lang_main_menu_mods", btn_x, btn_y + 24.0f * scale, btn_w, btn_h, scale)) {

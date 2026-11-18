@@ -160,10 +160,13 @@
     <ClCompile Include="game\inventory.cpp">
       <Filter>sources</Filter>
     </ClCompile>
-    <ClCompile Include="game\gui\inventory_screen.cpp">
+    <ClCompile Include="game\gui\survival_inventory.cpp">
       <Filter>sources</Filter>
     </ClCompile>
     <ClCompile Include="dependencies\imgui\imgui_freetype.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gui\world_selector.cpp">
       <Filter>sources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -514,8 +517,9 @@
     <ClInclude Include="game\gui\hud.h" />
     <ClInclude Include="rabbit3d\memory\pool.h" />
     <ClInclude Include="game\inventory.h" />
-    <ClInclude Include="game\gui\inventory_screen.h" />
+    <ClInclude Include="game\gui\survival_inventory.h" />
     <ClInclude Include="dependencies\imgui\imgui_freetype.h" />
+    <ClInclude Include="game\gui\world_selector.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="rabbit3d\audio\bass.dll" />

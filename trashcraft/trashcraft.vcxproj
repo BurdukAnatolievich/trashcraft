@@ -187,8 +187,9 @@
     <ClCompile Include="game\global_vars.cpp" />
     <ClCompile Include="game\gui\debug_overlay.cpp" />
     <ClCompile Include="game\gui\hud.cpp" />
-    <ClCompile Include="game\gui\inventory_screen.cpp" />
+    <ClCompile Include="game\gui\survival_inventory.cpp" />
     <ClCompile Include="game\gui\main_menu.cpp" />
+    <ClCompile Include="game\gui\world_selector.cpp" />
     <ClCompile Include="game\input.cpp" />
     <ClCompile Include="game\inventory.cpp" />
     <ClCompile Include="game\item.cpp" />
@@ -540,9 +541,10 @@
     <ClInclude Include="game\gui\debug_overlay.h" />
     <ClInclude Include="game\gui\gui_screen.h" />
     <ClInclude Include="game\gui\hud.h" />
-    <ClInclude Include="game\gui\inventory_screen.h" />
+    <ClInclude Include="game\gui\survival_inventory.h" />
     <ClInclude Include="game\gui\main_menu.h" />
     <ClInclude Include="game\gui\overlay.h" />
+    <ClInclude Include="game\gui\world_selector.h" />
     <ClInclude Include="game\input.h" />
     <ClInclude Include="game\inventory.h" />
     <ClInclude Include="game\item.h" />

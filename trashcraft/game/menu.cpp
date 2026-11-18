@@ -2,7 +2,7 @@
 #include "input.h"
 #include "game.h"
 
-#include "gui/inventory_screen.h"
+#include "gui/survival_inventory.h"
 
 #include <rabbit3d.h>
 
@@ -32,7 +32,7 @@ void c_ui_manager::update()
     }
     else {
         if (g_input->is_bind_pressed(BIND_INVENTORY))
-            g_ui_manager->push_screen(new c_inventory_screen());
+            g_ui_manager->push_screen(new c_survival_inventory());
     }
 }
 
@@ -83,7 +83,6 @@ void c_ui_manager::process_pending_actions()
         screen_stack.clear();
         pending_clear = false;
         pending_pop = false;
-        update_cursor_state();
     }
     else if (pending_pop) {
         if (!screen_stack.empty()) {
@@ -91,8 +90,8 @@ void c_ui_manager::process_pending_actions()
             screen_stack.pop_back();
         }
         pending_pop = false;
-        update_cursor_state();
     }
+    update_cursor_state();
 }
 
 void c_ui_manager::update_cursor_state() 

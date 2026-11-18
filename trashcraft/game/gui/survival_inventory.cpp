@@ -1,18 +1,18 @@
-#include "inventory_screen.h"
+#include "survival_inventory.h"
 #include "menu.h"
 #include "global_vars.h"
 #include "entity/entity_list.h"
 
 #include <algorithm>
 
-void c_inventory_screen::update()
+void c_survival_inventory::update()
 {
     if (g_input->is_bind_pressed(BIND_INVENTORY)) {
         g_ui_manager->pop_screen();
 	}
 }
 
-void c_inventory_screen::handle_slot_click(c_inventory* inventory, slot_entry_t& slot, bool right_click)
+void c_survival_inventory::handle_slot_click(c_inventory* inventory, slot_entry_t& slot, bool right_click)
 {
     c_inventory_item* target = slot.item;
 
@@ -84,7 +84,7 @@ void c_inventory_screen::handle_slot_click(c_inventory* inventory, slot_entry_t&
     }
 }
 
-void c_inventory_screen::render_slot_item(c_inventory_item* item, float x, float y, float scale)
+void c_survival_inventory::render_slot_item(c_inventory_item* item, float x, float y, float scale)
 {
     if (item->is_empty())
         return;
@@ -92,7 +92,7 @@ void c_inventory_screen::render_slot_item(c_inventory_item* item, float x, float
     g_menu_draw->draw_items(item, x, y, scale);
 }
 
-int c_inventory_screen::build_slots(c_inventory* inventory, slot_entry_t* out_slots)
+int c_survival_inventory::build_slots(c_inventory* inventory, slot_entry_t* out_slots)
 {
     int count = 0;
     for (int row = 0; row < INVENTORY_BAR_COUNT; row++) {
@@ -115,12 +115,12 @@ int c_inventory_screen::build_slots(c_inventory* inventory, slot_entry_t* out_sl
     return count;
 }
 
-bool c_inventory_screen::on_key_press(int key)
+bool c_survival_inventory::on_key_press(int key)
 {
     return false;
 }
 
-bool c_inventory_screen::on_mouse_click(int button, float x, float y)
+bool c_survival_inventory::on_mouse_click(int button, float x, float y)
 {
     if (button != ImGuiKey_MouseLeft && button != ImGuiKey_MouseRight)
         return false;
@@ -150,7 +150,7 @@ bool c_inventory_screen::on_mouse_click(int button, float x, float y)
     return false;
 }
 
-void c_inventory_screen::render(float scale)
+void c_survival_inventory::render(float scale)
 {
     last_scale = scale;
 

@@ -105,6 +105,36 @@ void c_menu_draw::sprite(const gui_sprite_t& sprite, float x, float y, float sca
     this->sprite(sprite.atlas, x, y, sprite.u, sprite.v, sprite.w, sprite.h, scale, color);
 }
 
+void c_menu_draw::rect_filled(float x, float y, float w, float h, ImU32 color)
+{
+    ImGui::GetBackgroundDrawList()->AddRectFilled(ImVec2(x, y), ImVec2(x + w, y + h), color);
+}
+
+void c_menu_draw::dirt_background(float x, float y, float w, float h, float scale, float scroll_y, ImU32 color)
+{
+    float tile_size = 32.0f * scale;
+    if (tile_size <= 0.0f) {
+        return;
+    }
+
+    float offset_y = std::fmod(scroll_y * 0.5f, tile_size);
+    if (offset_y < 0.0f) {
+        offset_y += tile_size;
+    }
+
+    float start_x = std::floor(x);
+    float start_y = std::floor(y - offset_y);
+
+    float end_x = x + w;
+    float end_y = y + h;
+
+    for (float draw_y = start_y; draw_y < end_y; draw_y += tile_size) {
+        for (float draw_x = start_x; draw_x < end_x; draw_x += tile_size) {
+            g_menu_draw->sprite(mc_sprites::DIRT_BG, draw_x, draw_y, scale * 2.0f, color);
+        }
+    }
+}
+
 void c_menu_draw::draw_iso_block(c_block* block, float x, float y, float size)
 {
     ImVec2 center(x + size * 0.5f, y + size * 0.5f);

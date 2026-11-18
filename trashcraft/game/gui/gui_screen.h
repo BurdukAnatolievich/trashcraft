@@ -9,6 +9,7 @@ public:
 
     virtual bool on_mouse_click(int button, float x, float y) { return false; };
     virtual bool on_key_press(int key) { return false; };
+	virtual bool on_mouse_scroll(int direction) { return false; };
 
     virtual bool pauses_game() const { return false; };
     virtual bool is_full_screen() const { return false; }
