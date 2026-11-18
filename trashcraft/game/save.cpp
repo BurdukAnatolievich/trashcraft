@@ -14,20 +14,58 @@ c_world_save* g_world_save = new c_world_save;
 
 void c_world_save::initialize()
 {
-    std::filesystem::create_directory(saves_path);
+    worlds.clear();
+    std::filesystem::create_directories(saves_path);
 
     for (const auto& entry : std::filesystem::directory_iterator(saves_path))
     {
         if (!entry.is_directory())
             continue;
 
-        std::filesystem::path world_info_path = entry.path().string() + "/world_info.tcworld";
-        std::ifstream world_info(world_info_path.string(), std::ios::binary);
-        if (world_info.is_open())
+        std::filesystem::path world_info_path = entry.path() / "world_info.tcworld";
+        std::ifstream world_info(world_info_path, std::ios::binary);
+        if (!world_info.is_open())
+            continue;
+
+        char magic[14] = {0};
+        world_info.read(magic, sizeof(magic));
+        if (world_info.gcount() != sizeof(magic) || std::memcmp(magic, "TrashcraftSave", 14) != 0)
         {
-            
             world_info.close();
+            continue;
         }
+
+        world_info.seekg(sizeof(int32_t), std::ios::cur);
+
+        char display_name_buf[64] = {0};
+        world_info.read(display_name_buf, sizeof(display_name_buf));
+        if (world_info.gcount() != sizeof(display_name_buf))
+        {
+            world_info.close();
+            continue;
+        }
+        display_name_buf[63] = '\0';
+
+        world_info.seekg(sizeof(uint64_t), std::ios::cur);
+
+        int32_t game_mode = 0;
+        uint8_t cheats = 0;
+
+        world_info.read((char*)&game_mode, sizeof(int32_t));
+        world_info.read((char*)&cheats, sizeof(uint8_t));
+
+        if (world_info.gcount() == sizeof(uint8_t))
+        {
+            world_info_t info{};
+            info.actual_name = entry.path().filename().string();
+            info.display_name = display_name_buf;
+            info.game_mode = game_mode;
+            info.cheats_allowed = (cheats != 0);
+
+            worlds.push_back(std::move(info));
+        }
+
+        world_info.close();
     }
 }
 

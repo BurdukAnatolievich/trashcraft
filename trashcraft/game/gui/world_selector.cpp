@@ -46,22 +46,18 @@ void c_world_selector::update()
 
 bool c_world_selector::on_mouse_click(int button, float x, float y)
 {
-    if (button != 0) {
-        return false;
-    }
-
     std::deque<c_world_save::world_info_t>& worlds = g_world_save->worlds;
 
     c_menu_draw::rect_size_t display = g_menu_draw->screen_size();
     float cx = display.width * 0.5f;
 
-    float list_top = 32.0f * last_scale;
-    float list_bottom = display.height - 64.0f * last_scale;
+    float list_top = std::floor(32.0f * last_scale);
+    float list_bottom = std::floor(display.height - 64.0f * last_scale);
 
-    float slot_w = 220.0f * last_scale;
-    float slot_h = 36.0f * last_scale;
+    float slot_w = std::floor(220.0f * last_scale);
+    float slot_h = std::floor(36.0f * last_scale);
 
-    float slot_x = cx - slot_w * 0.5f;
+    float slot_x = cx - std::floor(slot_w * 0.5f);
     if (x >= slot_x && x <= slot_x + slot_w && y >= list_top && y <= list_bottom) {
         float relative_y = (y - (list_top + 4.0f * last_scale)) + scroll_offset;
         if (relative_y >= 0.0f) {
@@ -105,24 +101,32 @@ void c_world_selector::render(float scale)
 
     float list_top = std::floor(32.0f * scale);
     float list_bottom = std::floor(display.height - 64.0f * scale);
-    float list_h = list_bottom - list_top;
 
+    float list_h = list_bottom - list_top;
     g_menu_draw->dirt_background(0.0f, list_top, display.width, list_h, scale, scroll_offset, IM_COL32(32, 32, 32, 255));
 
     float slot_w = std::floor(220.0f * scale);
     float slot_h = std::floor(36.0f * scale);
+
     float slot_x = cx - std::floor(slot_w * 0.5f);
 
+    float total_content_h = static_cast<float>(worlds.size()) * slot_h + std::floor(8.0f * scale);
+
+    float start_y = list_top + std::floor(4.0f * scale);
+    if (total_content_h < list_h) {
+        start_y = list_top + std::floor((list_h - total_content_h) * 0.5f) + std::floor(4.0f * scale);
+    }
+
     for (size_t i = 0; i < worlds.size(); ++i) {
-        float item_y = list_top + std::floor(4.0f * scale) + (static_cast<float>(i) * slot_h) - scroll_offset;
+        float item_y = start_y + (static_cast<float>(i) * slot_h) - scroll_offset;
         if (item_y + slot_h < list_top || item_y > list_bottom) {
             continue;
         }
 
         const auto& world = worlds[i];
         if (i == g_global_vars->world_id) {
-            g_menu_draw->rect_filled(slot_x - 2.0f * scale, item_y - 2.0f * scale, slot_x + slot_w + 2.0f * scale, item_y + slot_h - 2.0f * scale, IM_COL32(128, 128, 128, 255));
-            g_menu_draw->rect_filled(slot_x - 1.0f * scale, item_y - 1.0f * scale, slot_x + slot_w + 1.0f * scale, item_y + slot_h - 3.0f * scale, IM_COL32(0, 0, 0, 255));
+            g_menu_draw->rect_filled(slot_x - std::floor(2.0f * scale), item_y - std::floor(2.0f * scale), slot_w + std::floor(4.0f * scale), std::floor(34.0f * scale), IM_COL32(128, 128, 128, 255));
+            g_menu_draw->rect_filled(slot_x - std::floor(1.0f * scale), item_y - std::floor(1.0f * scale), slot_w + std::floor(2.0f * scale), std::floor(32.0f * scale), IM_COL32(0, 0, 0, 255));
         }
 
         float text_x = slot_x + 2.0f * scale;

@@ -367,6 +367,7 @@ models/
 sounds/
 textures/
 fonts/
+saves/
 *.zip
 *.rar
 *.dll
