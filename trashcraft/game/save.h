@@ -25,11 +25,13 @@ public:
         std::unordered_map<std::string, int> game_rules;
     };
 
-    struct save_chunk_t
+#pragma pack(push, 1)
+    struct saved_item_entry_t
     {
-        glm::ivec2 index = glm::ivec2(0, 0);
-        uint32_t blocks[CHUNK_SIZE * CHUNK_SIZE * WORLD_HEIGHT];
+        uint16_t id = 0;
+        char name[64] = { 0 };
     };
+#pragma pack(pop)
 private:
     std::string saves_path = "saves/";
 public:
@@ -43,9 +45,8 @@ public:
     void load_world(int id);
     void save_world();
 
-    void load_chunk(world_chunk_t* chunk);
-    void load_chunk(std::string chunk);
-    void save_chunk(world_chunk_t* chunk);
+    bool load_chunk(const std::string& chunk_id);
+    bool save_chunk(world_chunk_t* chunk);
 
     void create_world(const std::string& display_name, const std::string& actual_name);
 };

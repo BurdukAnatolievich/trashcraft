@@ -22,11 +22,10 @@ void c_world_save::initialize()
             continue;
 
         std::filesystem::path world_info_path = entry.path().string() + "/world_info.tcworld";
-        std::ifstream world_info(world_info_path.string());
+        std::ifstream world_info(world_info_path.string(), std::ios::binary);
         if (world_info.is_open())
         {
-
-
+            
             world_info.close();
         }
     }
@@ -34,41 +33,97 @@ void c_world_save::initialize()
 
 void c_world_save::load_world(int id)
 {
-    if (id < 0 || id >= worlds.size())
+    if (id < 0 || id >= static_cast<int>(worlds.size())) {
         return;
+    }
 
     world_info_t& info = worlds.at(id);
 
     g_world->name = info.actual_name;
     g_world->info = &info;
+    g_global_vars->world_id = id;
+    g_global_vars->world_name = info.display_name;
 
-    //float x = std::stof(info.parsed_info.at(3));
-    //float y = std::stof(info.parsed_info.at(4));
-    //float z = std::stof(info.parsed_info.at(5));
+    id_to_item.clear();
 
-    //g_global_vars->local_player->set_origin(glm::vec3(x, y, z));
+    std::string info_path = saves_path + g_world->name + "/world_info.tcworld";
+    std::ifstream file(info_path, std::ios::binary);
 
-    //for (int i = 6; i < info.parsed_info.size(); i++)
-    //{
-    //    std::vector<std::string> splitted_string;
+    if (file.is_open()) {
+        char magic[14] = { 0 };
+        file.read(magic, sizeof(magic));
 
-    //    std::stringstream stream;
-    //    stream << info.parsed_info.at(i);
+        if (file.gcount() == sizeof(magic) && std::memcmp(magic, "TrashcraftSave", 14) == 0) {
+            int32_t gen_version = 0;
+            file.read((char*)&gen_version, sizeof(gen_version));
 
-    //    std::string temp;
-    //    while (std::getline(stream, temp, ':')) { splitted_string.push_back(temp); }
+            if (gen_version != TRASHCRAFT_WORLD_GENERATOR_VERSION) {
+                file.close();
+                return;
+            }
 
-    //    if (splitted_string.size() != 2)
-    //        continue;
+            char display_name_buf[64] = { 0 };
+            file.read(display_name_buf, sizeof(display_name_buf));
+            display_name_buf[63] = '\0';
+            info.display_name = display_name_buf;
+            g_global_vars->world_name = info.display_name;
 
-    //    short id = std::stoi(splitted_string[0]);
-    //    indices_to_item[id] = g_global_vars->items[splitted_string[1]];
-    //}
+            file.read((char*)&info.last_played, sizeof(uint64_t));
 
-    //for (int i = 0; i < info.chunks.size(); i++)
-    //{
-    //    load_chunk(info.chunks.at(i));
-    //}
+            int32_t game_mode = 0;
+            file.read((char*)&game_mode, sizeof(int32_t));
+            info.game_mode = game_mode;
+
+            uint8_t cheats = 0;
+            file.read((char*)&cheats, sizeof(uint8_t));
+            info.cheats_allowed = (cheats != 0);
+            g_global_vars->cheats_allowed = info.cheats_allowed;
+
+            glm::vec3 spawn_origin(0.0f); glm::ivec2 spawn_chunk(0);
+            file.read((char*)&spawn_origin, sizeof(glm::vec3));
+            file.read((char*)&spawn_chunk, sizeof(glm::ivec2));
+            if (g_global_vars->local_player) {
+                g_global_vars->local_player->origin = spawn_origin;
+                g_global_vars->local_player->chunk = spawn_chunk;
+            }
+
+            uint16_t rules_count = 0;
+            file.read((char*)&rules_count, sizeof(uint16_t));
+            for (uint16_t i = 0; i < rules_count; ++i) {
+                char rule_buf[64] = { 0 };
+                int32_t val = 0;
+                file.read(rule_buf, sizeof(rule_buf));
+                file.read((char*)&val, sizeof(int32_t));
+                rule_buf[63] = '\0';
+
+                g_global_vars->set_game_rule(rule_buf, val);
+            }
+
+            uint16_t items_count = 0;
+            file.read((char*)&items_count, sizeof(uint16_t));
+
+            for (uint16_t i = 0; i < items_count; ++i) {
+                saved_item_entry_t entry{};
+                file.read((char*)&entry, sizeof(saved_item_entry_t));
+                entry.name[63] = '\0';
+
+                auto it = g_global_vars->items.find(entry.name);
+                if (it != g_global_vars->items.end()) {
+                    id_to_item[entry.id] = it->second;
+                }
+            }
+        }
+        file.close();
+    }
+
+    std::string chunks_dir = saves_path + g_world->name + "/chunks/";
+    if (std::filesystem::exists(chunks_dir)) {
+        for (const auto& entry : std::filesystem::directory_iterator(chunks_dir)) {
+            if (entry.is_regular_file() && entry.path().extension() == ".tchunk") {
+                load_chunk(entry.path().stem().string());
+            }
+        }
+    }
 
     g_world->build_chunks();
 
@@ -77,64 +132,135 @@ void c_world_save::load_world(int id)
 
 void c_world_save::save_world()
 {
-    std::ofstream world_info(saves_path + g_world->name + "/world_info.tcworld");
-    if (world_info.is_open())
-    {
-        world_info << "TrashcraftSave\n";
-        world_info << TRASHCRAFT_WORLD_GENERATOR_VERSION << "\n";
-        world_info << g_world->info->display_name << "\n";
-
-        if (g_global_vars->local_player)
-        {
-            glm::vec3 origin = g_global_vars->local_player->get_origin();
-            world_info << origin.x << "\n" << origin.y << "\n" << origin.z << "\n";
-        }
-
-        int item_id = 0;
-        for (auto& pair : g_global_vars->items)
-        {
-            world_info << std::dec << item_id << ":" << pair.first << "\n";
-            item_to_id[pair.second] = item_id;
-            item_id++;
-        }
-
-        world_info.close();
+    if (!g_world || !g_world->info) {
+        return;
     }
 
-    //for (int i = 0; i < g_world->chunks.size(); i++)
-    //{
-    //    world_chunk_t* chunk = &g_world->chunks.at(i);
+    std::string world_dir = saves_path + g_world->name + "/";
+    std::filesystem::create_directories(world_dir + "chunks/");
 
-    //    save_chunk(chunk);
-    //}
+    g_world->info->last_played = static_cast<uint64_t>(std::time(nullptr));
+
+    std::ofstream file(world_dir + "world_info.tcworld", std::ios::binary | std::ios::trunc);
+    if (!file.is_open()) {
+        return;
+    }
+
+    const char magic[14] = { 'T','r','a','s','h','c','r','a','f','t','S','a','v','e' };
+    file.write(magic, sizeof(magic));
+
+    int32_t gen_version = TRASHCRAFT_WORLD_GENERATOR_VERSION;
+    file.write((const char*)&gen_version, sizeof(gen_version));
+
+    char display_name_buf[64] = { 0 };
+    std::strncpy(display_name_buf, g_world->info->display_name.c_str(), sizeof(display_name_buf) - 1);
+    file.write(display_name_buf, sizeof(display_name_buf));
+
+    file.write((const char*)&g_world->info->last_played, sizeof(uint64_t));
+
+    int32_t game_mode = g_world->info->game_mode;
+    file.write((const char*)&game_mode, sizeof(int32_t));
+
+    uint8_t cheats = g_global_vars->cheats_allowed ? 1 : 0;
+    file.write((const char*)&cheats, sizeof(uint8_t));
+
+    glm::vec3 origin = g_global_vars->local_player ? g_global_vars->local_player->origin : glm::vec3(0.0f);
+    file.write((const char*)&origin, sizeof(glm::vec3));
+
+    glm::ivec2 chunk_origin = g_global_vars->local_player ? g_global_vars->local_player->chunk : glm::ivec2(0);
+    file.write((const char*)&chunk_origin, sizeof(glm::ivec2));
+
+    uint16_t rules_count = static_cast<uint16_t>(g_global_vars->game_rules.size());
+    file.write((const char*)&rules_count, sizeof(uint16_t));
+
+    for (const auto& [rule_name, rule_val] : g_global_vars->game_rules) {
+        char rule_buf[64] = { 0 };
+        std::strncpy(rule_buf, rule_name.c_str(), sizeof(rule_buf) - 1);
+        int32_t val = rule_val;
+
+        file.write(rule_buf, sizeof(rule_buf));
+        file.write((const char*)&val, sizeof(int32_t));
+    }
 
     item_to_id.clear();
+    uint16_t items_count = static_cast<uint16_t>(g_global_vars->items.size());
+    file.write((const char*)&items_count, sizeof(uint16_t));
+
+    for (const auto& [item_name, item_ptr] : g_global_vars->items) {
+        saved_item_entry_t entry{};
+        entry.id = item_ptr->numeric_id;
+        std::strncpy(entry.name, item_name.c_str(), sizeof(entry.name) - 1);
+
+        file.write((const char*)&entry, sizeof(saved_item_entry_t));
+    }
+
+    file.close();
+
+    for (auto& [hash, chunk] : g_world->chunks) {
+        if (chunk) {
+            save_chunk(chunk);
+        }
+    }
 }
 
-void c_world_save::load_chunk(world_chunk_t* chunk)
+bool c_world_save::load_chunk(const std::string& chunk_id)
 {
+    std::string chunk_path = saves_path + g_world->name + "/chunks/" + chunk_id + ".tchunk";
 
+    std::ifstream chunk_file(chunk_path, std::ios::binary | std::ios::ate);
+    if (!chunk_file.is_open()) {
+        return false;
+    }
+
+    if (chunk_file.tellg() != sizeof(world_chunk_t)) {
+        return false;
+    }
+
+    glm::ivec2 index = glm::ivec2(0);
+
+    chunk_file.seekg(0);
+    chunk_file.read((char*)&index, sizeof(glm::ivec2));
+
+    world_chunk_t*& chunk = g_world->chunks[CHUNK_POS_H(index.x, index.y)];
+    if (!chunk) {
+        chunk = new world_chunk_t();
+    }
+    else {
+        __debugbreak();
+    }
+
+    chunk_file.seekg(0);
+    chunk_file.read((char*)chunk, sizeof(world_chunk_t));
+
+    chunk->opaque_mesh = nullptr;
+    chunk->translucent_mesh = nullptr;
+
+    chunk->last_visited = 0;
+    chunk->update();
+
+    return true;
 }
 
-void c_world_save::load_chunk(std::string chunk_id)
+bool c_world_save::save_chunk(world_chunk_t* chunk)
 {
-    std::string chunk_dir_path = saves_path + g_world->name + "/chunks/" + chunk_id + ".tchunk";
-    std::ifstream chunk_file(chunk_dir_path, std::ios::binary);
-    if (!chunk_file.is_open())
-        return;
+    if (!chunk) {
+        return false;
+    }
 
-    save_chunk_t* save_chunk = new save_chunk_t;
+    std::string chunks_dir = saves_path + g_world->name + "/chunks/";
 
-    chunk_file.read((char*)save_chunk, sizeof(save_chunk_t));
-    chunk_file.close();
+    std::string chunk_id = std::to_string(chunk->index.x) + "_" + std::to_string(chunk->index.y);
+    std::string chunk_path = chunks_dir + chunk_id + ".tchunk";
 
+    std::ofstream chunk_file(chunk_path, std::ios::binary | std::ios::trunc);
+    if (chunk_file.is_open()) {
+        chunk_file.write((char*)chunk, sizeof(world_chunk_t));
+        chunk_file.close();
 
-    delete save_chunk;
-}
+        return true;
+    }
 
-void c_world_save::save_chunk(world_chunk_t* chunk)
-{
-
+    return false;
 }
 
 void c_world_save::create_world(const std::string& display_name, const std::string& actual_name)
@@ -144,7 +270,7 @@ void c_world_save::create_world(const std::string& display_name, const std::stri
     info.actual_name = actual_name;
 
     std::filesystem::create_directory(saves_path + actual_name);
-    //std::filesystem::create_directory(info.chunks_path);
+    std::filesystem::create_directory(saves_path + actual_name + "/chunks/");
 
     g_world->name = actual_name;
     g_world->info = &info;

@@ -69,6 +69,7 @@ void c_game::start()
 
     g_world->set_generator_seed(12345);
 
+    g_global_vars->world_name = "New Kal " + std::to_string(time(0));
     if (g_global_vars->world_id != -1)
         g_world_save->load_world(g_global_vars->world_id);
     else

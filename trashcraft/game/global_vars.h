@@ -24,12 +24,15 @@ public:
     c_camera* camera = nullptr;
 
     bool in_game = false;
+    bool cheats_allowed = false;
 
     std::map<std::string, c_item*> items;
     std::map<std::string, c_crafting_recipe*> recipes;
 
-    c_item* mapped_items[16384] = { nullptr };
-    bool mapped_transparency[16384] = { false };
+    std::unordered_map<std::string, int> game_rules;
+
+    c_item* mapped_items[MAX_ITEM_COUNT] = { nullptr };
+    bool mapped_transparency[MAX_ITEM_COUNT] = { false };
 
     int world_id = -1;
     std::string world_name = "";
@@ -38,9 +41,8 @@ public:
     void initialize_items();
     void initialize_recipes();
 
-    c_inventory_item* give_item(c_item* item, int count = 1);
-    void drop_item(c_inventory_item* item, glm::vec3 origin = glm::vec3(FLT_MAX), glm::vec3 up = glm::vec3(FLT_MAX));
-    bool put_item(c_inventory_item* item);
+    inline bool get_game_rule(const std::string& rule, int& rule_value) { auto iterator = game_rules.find(rule); if (iterator == game_rules.end()) return false; rule_value = iterator->second; return true; }
+    inline bool set_game_rule(const std::string& rule, int rule_value) { auto iterator = game_rules.find(rule); if (iterator == game_rules.end()) return false; iterator->second = rule_value; return true; }
 
     void start();
     void finish();
