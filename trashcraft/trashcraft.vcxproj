@@ -185,6 +185,7 @@
     <ClCompile Include="game\event_manager.cpp" />
     <ClCompile Include="game\game.cpp" />
     <ClCompile Include="game\global_vars.cpp" />
+    <ClCompile Include="game\gui\creative_inventory.cpp" />
     <ClCompile Include="game\gui\debug_overlay.cpp" />
     <ClCompile Include="game\gui\hud.cpp" />
     <ClCompile Include="game\gui\survival_inventory.cpp" />
@@ -538,6 +539,7 @@
     <ClInclude Include="game\event_manager.h" />
     <ClInclude Include="game\game.h" />
     <ClInclude Include="game\global_vars.h" />
+    <ClInclude Include="game\gui\creative_inventory.h" />
     <ClInclude Include="game\gui\debug_overlay.h" />
     <ClInclude Include="game\gui\gui_screen.h" />
     <ClInclude Include="game\gui\hud.h" />

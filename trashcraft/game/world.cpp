@@ -264,7 +264,6 @@ void c_world::generate_world(int size)
     std::cout << gena << std::endl;
 
     update_chunks(false, true);
-    build_chunks();
 }
 
 void c_world::generate_world_based_on_player_position()
@@ -702,6 +701,7 @@ void c_world::update_chunks(bool update_tick, bool update_render)
                 world_chunk_t* chunk = unrendered_chunk({ abs_cx, abs_cz });
                 if (chunk && chunk->should_update) {
                     build_chunk_mesh(chunk);
+                    chunk->should_save = true;
                     chunk->should_update = false;
                 }
 

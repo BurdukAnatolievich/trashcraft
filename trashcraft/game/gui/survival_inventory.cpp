@@ -159,11 +159,9 @@ void c_survival_inventory::render(float scale)
         return;
     }
 
-    ImVec2 mouse_pos = ImGui::GetIO().MousePos;
-    ImDrawList* draw = ImGui::GetBackgroundDrawList();
     c_menu_draw::rect_size_t display = g_menu_draw->screen_size();
 
-    draw->AddRectFilled({ 0.0f, 0.0f }, { display.width, display.height }, IM_COL32(16, 16, 16, 192));
+    g_menu_draw->rect_filled(0.0f, 0.0f, display.width, display.height, IM_COL32(16, 16, 16, 192));
 
     float inv_w = 176.0f * scale;
     float inv_h = 166.0f * scale;
@@ -176,6 +174,8 @@ void c_survival_inventory::render(float scale)
     slot_entry_t slots[INVENTORY_BAR_SIZE * (INVENTORY_BAR_COUNT + 1) + 4 + 1];
     int count = build_slots(&local->inventory, slots);
 
+    glm::vec2 mouse_pos = g_input->get_mouse_position();
+
     float slot_size = 16.0f * scale;
     for (int i = 0; i < count; ++i) {
         float sx = inv_x + slots[i].x * scale;
@@ -183,7 +183,7 @@ void c_survival_inventory::render(float scale)
 
         if (mouse_pos.x >= sx && mouse_pos.x < sx + slot_size &&
             mouse_pos.y >= sy && mouse_pos.y < sy + slot_size) {
-            draw->AddRectFilled({ sx, sy }, { sx + slot_size, sy + slot_size }, IM_COL32(255, 255, 255, 128));
+            g_menu_draw->rect_filled(sx, sy, slot_size, slot_size, IM_COL32(255, 255, 255, 128));
         }
 
         render_slot_item(slots[i].item, sx, sy, scale);

@@ -9,6 +9,13 @@ enum e_inventory_bar
 	BAR_MAX
 };
 
+struct slot_entry_t
+{
+	c_inventory_item* item = nullptr;
+	float x = 0.0f, y = 0.0f;
+	bool is_product = false;
+};
+
 class c_inventory
 {
 public:

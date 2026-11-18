@@ -53,16 +53,23 @@ bool c_world_selector::on_mouse_click(int button, float x, float y)
 
     float list_top = std::floor(32.0f * last_scale);
     float list_bottom = std::floor(display.height - 64.0f * last_scale);
+    float list_h = list_bottom - list_top;
 
     float slot_w = std::floor(220.0f * last_scale);
     float slot_h = std::floor(36.0f * last_scale);
-
     float slot_x = cx - std::floor(slot_w * 0.5f);
-    if (x >= slot_x && x <= slot_x + slot_w && y >= list_top && y <= list_bottom) {
-        float relative_y = (y - (list_top + 4.0f * last_scale)) + scroll_offset;
+
+    float total_content_h = static_cast<float>(worlds.size()) * slot_h + std::floor(8.0f * last_scale);
+    float start_y = list_top + std::floor(4.0f * last_scale);
+    if (total_content_h < list_h) {
+        start_y = list_top + std::floor((list_h - total_content_h) * 0.5f) + std::floor(4.0f * last_scale);
+    }
+
+    if (x >= slot_x - std::floor(2.0f * last_scale) && x <= slot_x + slot_w + std::floor(2.0f * last_scale) && y >= list_top && y <= list_bottom) {
+        float relative_y = (y - start_y) + scroll_offset;
         if (relative_y >= 0.0f) {
-            int clicked_idx = relative_y / slot_h;
-            if (clicked_idx >= 0 && clicked_idx < worlds.size()) {
+            int clicked_idx = static_cast<int>(relative_y / slot_h);
+            if (clicked_idx >= 0 && clicked_idx < static_cast<int>(worlds.size())) {
                 g_global_vars->world_id = clicked_idx;
                 return true;
             }

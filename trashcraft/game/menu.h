@@ -54,6 +54,9 @@ namespace mc_sprites {
     constexpr gui_sprite_t XP_BAR_FULL = { "icons", 0, 69, 182, 5 };
 
     constexpr gui_sprite_t DIRT_BG = { "options_background", 0, 0, 16, 16 };
+
+    constexpr gui_sprite_t CREATIVE_BG = { "allitems", 0, 0, 176, 208 };
+    constexpr gui_sprite_t CREATIVE_SCROLL_THUMB = { "allitems", 176, 0, 12, 15 };
 }
 
 class c_menu_draw

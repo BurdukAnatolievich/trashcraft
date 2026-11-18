@@ -15,6 +15,14 @@ class c_inventory_item;
 class c_crafting_recipe;
 class c_scene_object;
 
+enum e_game_mode
+{
+    NONE = -1,
+    CREATIVE,
+    SURVIVAL,
+    MAX
+};
+
 class c_global_vars
 {
 public:

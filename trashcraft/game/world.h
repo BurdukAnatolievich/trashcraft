@@ -45,10 +45,10 @@ struct world_chunk_t
     uint32_t blocks[CHUNK_SIZE * CHUNK_SIZE * WORLD_HEIGHT] = { 0 };
     uint8_t block_light[CHUNK_SIZE * CHUNK_SIZE * WORLD_HEIGHT] = { 0 };
 
-    bool should_update = false, is_ghost = false;
+    bool should_update = false, should_save = false, is_ghost = false;
     uint8_t update_priority = 0;
 
-    c_mesh* opaque_mesh = nullptr, * translucent_mesh = nullptr;
+    c_mesh* opaque_mesh = nullptr, *translucent_mesh = nullptr;
 
     inline uint16_t get_block_id(const glm::ivec3& pos) {
         uint32_t& block = blocks[REL_POS_TO_IDX(pos.x, pos.y, pos.z)];

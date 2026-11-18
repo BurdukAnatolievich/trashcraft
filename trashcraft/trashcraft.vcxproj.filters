@@ -169,6 +169,9 @@
     <ClCompile Include="game\gui\world_selector.cpp">
       <Filter>sources</Filter>
     </ClCompile>
+    <ClCompile Include="game\gui\creative_inventory.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rabbit3d\raytrace\shader.h" />
@@ -520,6 +523,7 @@
     <ClInclude Include="game\gui\survival_inventory.h" />
     <ClInclude Include="dependencies\imgui\imgui_freetype.h" />
     <ClInclude Include="game\gui\world_selector.h" />
+    <ClInclude Include="game\gui\creative_inventory.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="rabbit3d\audio\bass.dll" />

@@ -76,6 +76,7 @@ void c_world_save::load_world(int id)
     }
 
     world_info_t& info = worlds.at(id);
+    info.last_played = std::time(0);
 
     g_world->name = info.actual_name;
     g_world->info = &info;
@@ -163,7 +164,7 @@ void c_world_save::load_world(int id)
         }
     }
 
-    g_world->build_chunks();
+    g_world->update_chunks(false, true);
 
     id_to_item.clear();
 }

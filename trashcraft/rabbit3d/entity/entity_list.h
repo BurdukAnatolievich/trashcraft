@@ -123,14 +123,6 @@ public:
     c_player();
     ~c_player();
 
-    enum e_game_mode
-    {
-        NONE = -1,
-        CREATIVE,
-        SURVIVAL,
-        MAX
-    };
-
     enum e_damage_reason
     {
         UNKNOWN = 0,
