@@ -6,10 +6,9 @@ class c_world_selector : public c_gui_screen
     float last_scale = 0.0f;
 	float scroll_offset = 0.0f;
 
-    int selected_index = -1;
-
     void refresh_world_list();
     void load_selected_world();
+    void load_create_world();
     void delete_selected_world();
 public:
     c_world_selector() {

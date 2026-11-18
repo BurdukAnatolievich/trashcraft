@@ -12,9 +12,17 @@ void c_world_selector::refresh_world_list()
 void c_world_selector::load_selected_world()
 {
     std::deque<c_world_save::world_info_t>& worlds = g_world_save->worlds;
-    if (selected_index < 0 || selected_index >= worlds.size()) {
+    if (g_global_vars->world_id < 0 || g_global_vars->world_id >= worlds.size()) {
         return;
     }
+
+    g_game->start();
+    g_ui_manager->clear_screens();
+}
+
+void c_world_selector::load_create_world()
+{
+    g_global_vars->world_id = -1;
 
     g_game->start();
     g_ui_manager->clear_screens();
@@ -23,12 +31,12 @@ void c_world_selector::load_selected_world()
 void c_world_selector::delete_selected_world()
 {
     std::deque<c_world_save::world_info_t>& worlds = g_world_save->worlds;
-    if (selected_index < 0 || selected_index >= worlds.size()) {
+    if (g_global_vars->world_id < 0 || g_global_vars->world_id >= worlds.size()) {
         return;
     }
 
-    worlds.erase(worlds.begin() + selected_index);
-    selected_index = -1;
+    worlds.erase(worlds.begin() + g_global_vars->world_id);
+    g_global_vars->world_id = -1;
 }
 
 void c_world_selector::update()
@@ -59,7 +67,7 @@ bool c_world_selector::on_mouse_click(int button, float x, float y)
         if (relative_y >= 0.0f) {
             int clicked_idx = relative_y / slot_h;
             if (clicked_idx >= 0 && clicked_idx < worlds.size()) {
-                selected_index = clicked_idx;
+                g_global_vars->world_id = clicked_idx;
                 return true;
             }
         }
@@ -112,7 +120,7 @@ void c_world_selector::render(float scale)
         }
 
         const auto& world = worlds[i];
-        if (i == selected_index) {
+        if (i == g_global_vars->world_id) {
             g_menu_draw->rect_filled(slot_x - 2.0f * scale, item_y - 2.0f * scale, slot_x + slot_w + 2.0f * scale, item_y + slot_h - 2.0f * scale, IM_COL32(128, 128, 128, 255));
             g_menu_draw->rect_filled(slot_x - 1.0f * scale, item_y - 1.0f * scale, slot_x + slot_w + 1.0f * scale, item_y + slot_h - 3.0f * scale, IM_COL32(0, 0, 0, 255));
         }
@@ -142,7 +150,7 @@ void c_world_selector::render(float scale)
 
     float step_x = sub_btn_w + gap;
 
-    bool has_selection = (selected_index >= 0 && selected_index < static_cast<int>(worlds.size()));
+    bool has_selection = (g_global_vars->world_id >= 0 && g_global_vars->world_id < worlds.size());
 
     if (g_menu_draw->button("lang_select_world_play", left_edge, row1_y, top_btn_w, btn_h, scale) && has_selection) {
         load_selected_world();
@@ -150,7 +158,8 @@ void c_world_selector::render(float scale)
     }
 
     if (g_menu_draw->button("lang_select_world_create", left_edge + top_btn_w + gap, row1_y, top_btn_w, btn_h, scale)) {
-
+        load_create_world();
+        return;
     }
 
     if (g_menu_draw->button("lang_select_world_rename", left_edge, row2_y, sub_btn_w, btn_h, scale) && has_selection) {

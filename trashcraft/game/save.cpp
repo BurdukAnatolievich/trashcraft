@@ -276,4 +276,6 @@ void c_world_save::create_world(const std::string& display_name, const std::stri
     g_world->info = &info;
 
     g_world->generate_world(128);
+
+    save_world();
 }
