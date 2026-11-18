@@ -14,26 +14,26 @@ void c_global_vars::initialize_blocks()
 
     new c_block("Air", "air", { "", "", "" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), -1.0f);
 
-    new c_block("Cherry planks", "cherry_planks", { "cherry_planks", "", "" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 2.0f, c_tool::e_tool::ANY | c_tool::e_tool::AXE, c_tool::e_tool::ANY);
-    new c_block("Cherry leaves", "cherry_leaves", { "cherry_leaves", "", "" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.2f, c_tool::e_tool::ANY, c_tool::e_tool::ANY, "", true, true);
-    new c_block("Cherry log", "cherry_log", { "cherry_log", "cherry_log_top", "cherry_log_top" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 2.0f, c_tool::e_tool::ANY | c_tool::e_tool::AXE, c_tool::e_tool::ANY);
+    new c_block("Oak planks", "oak_planks", { "wood", "", "" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 2.0f, c_tool::e_tool::ANY | c_tool::e_tool::AXE, c_tool::e_tool::ANY);
+    new c_block("Oak leaves", "oak_leaves", { "leaves", "", "" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.2f, c_tool::e_tool::ANY, c_tool::e_tool::ANY, "", true, true);
+    new c_block("Oak log", "oak_log", { "tree_side", "tree_top", "tree_top" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 2.0f, c_tool::e_tool::ANY | c_tool::e_tool::AXE, c_tool::e_tool::ANY);
 
     new c_block("Glass", "glass", { "glass", "", "" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, c_tool::e_tool::ANY, c_tool::e_tool::ANY, "", true, true);
 
     new c_block("Dirt", "dirt", { "dirt", "", "" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, c_tool::e_tool::ANY | c_tool::e_tool::SHOVEL, c_tool::e_tool::ANY);
-    new c_block("Grass", "grass_block", { "grass_block_side", "grass_block_top", "dirt" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.6f, c_tool::e_tool::ANY | c_tool::e_tool::SHOVEL, c_tool::e_tool::ANY, "dirt");
+    new c_block("Grass", "grass_block", { "grass_side", "grass_top", "dirt" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.6f, c_tool::e_tool::ANY | c_tool::e_tool::SHOVEL, c_tool::e_tool::ANY, "dirt");
 
     new c_block("Stone", "stone", { "stone", "", "" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.5f, c_tool::e_tool::PICKAXE, c_tool::e_tool::PICKAXE);
 
-    new c_block("Crafting table", "crafting_table", { "crafting_table_side", "crafting_table_top", "oak_planks" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 2.5f, c_tool::e_tool::ANY | c_tool::e_tool::AXE, c_tool::e_tool::ANY, "", true, false, false, c_block::e_block_type::T_DEFAULT, "", c_block::e_interactable_type::I_CRAFTING_TABLE);
-    new c_block("Jukebox", "jukebox", { "jukebox_side", "jukebox_top", "" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, c_tool::e_tool::ANY | c_tool::e_tool::AXE, c_tool::e_tool::ANY, "", true, false, false, c_block::e_block_type::T_JUKEBOX, "", c_block::e_interactable_type::I_JUKEBOX);
+    new c_block("Crafting table", "crafting_table", { "workbench_side", "workbench_top", "wood" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 2.5f, c_tool::e_tool::ANY | c_tool::e_tool::AXE, c_tool::e_tool::ANY, "", true, false, false, c_block::e_block_type::T_DEFAULT, "", c_block::e_interactable_type::I_CRAFTING_TABLE);
+    new c_block("Jukebox", "jukebox", { "musicBlock", "jukebox_top", "musicBlock" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, c_tool::e_tool::ANY | c_tool::e_tool::AXE, c_tool::e_tool::ANY, "", true, false, false, c_block::e_block_type::T_JUKEBOX, "", c_block::e_interactable_type::I_JUKEBOX);
 
     new c_block("Chest", "chest", { "chest_side", "chest_top", "chest_top" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 2.5f, c_tool::e_tool::AXE, c_tool::e_tool::ANY, "", true, false, false, c_block::e_block_type::T_CHEST, "", c_block::e_interactable_type::I_CHEST);
 
     new c_block("Sand", "sand", { "sand", "", "" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, c_tool::e_tool::ANY | c_tool::e_tool::SHOVEL, c_tool::e_tool::ANY);
-    new c_block("Water", "water", { "water_still", "", "" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.875f, 1.0f), -1.0f, c_tool::e_tool::NONE, c_tool::e_tool::NONE, "", false, true);
+    new c_block("Water", "water", { "water", "", "" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.875f, 1.0f), -1.0f, c_tool::e_tool::NONE, c_tool::e_tool::NONE, "", false, true);
 
-    new c_block("Cherry door", "cherry_door", { "", "", "" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.1875f, 1.0f, 2.0f), 3.0f, c_tool::e_tool::ANY | c_tool::e_tool::AXE, c_tool::e_tool::ANY, "", true, false, false, c_block::e_block_type::T_DOOR, "cherry_door", c_block::e_interactable_type::I_DOOR, "cherry_door_block");
+    new c_block("Oak door", "oak_door", { "", "", "" }, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.1875f, 1.0f, 2.0f), 3.0f, c_tool::e_tool::ANY | c_tool::e_tool::AXE, c_tool::e_tool::ANY, "", true, false, false, c_block::e_block_type::T_DOOR, "cherry_door", c_block::e_interactable_type::I_DOOR, "cherry_door_block");
 }
 
 void c_global_vars::initialize_items()
@@ -52,8 +52,7 @@ void c_global_vars::initialize_items()
     // RECORDS
 
     new c_music_disc("Music Disc", "music_disc_chirp", "C418 - Chirp", "record_chirp", "music_disc_chirp");
-    new c_music_disc("Music Disc", "music_disc_cherry", "ssshhhiiittt! - vishenka", "record_cherry", "music_disc_chirp");
-    new c_music_disc("Music Disc", "music_disc_tam", "bilbordy - tam", "record_tam", "music_disc_tam");
+    
 }
 
 void c_global_vars::initialize_recipes()

@@ -77,7 +77,6 @@ void c_texture_manager::initialize()
     // GUI
 
     load_textures_from_directory("gui/", TEXTURE_CATEGORY_GUI);
-    load_textures_from_directory("gui/container/", TEXTURE_CATEGORY_GUI);
 
     // ENTITIES
 

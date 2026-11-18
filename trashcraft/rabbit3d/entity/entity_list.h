@@ -3,6 +3,7 @@
 
 #include <item.h>
 #include <inventory.h>
+#include <global_vars.h>
 #include <input.h>
 
 #include <ext.hpp>

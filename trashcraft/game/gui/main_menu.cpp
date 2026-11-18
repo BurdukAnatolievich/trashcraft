@@ -19,8 +19,7 @@ void c_main_menu::render(float scale)
     float logo_x = cx - total_logo_w * 0.5f;
     float logo_y = 30.0f * scale;
 
-    g_menu_draw->sprite(mc_sprites::TITLE_MINE, logo_x, logo_y, scale);
-    g_menu_draw->sprite(mc_sprites::TITLE_CRAFT, logo_x + 155.0f * scale, logo_y, scale);
+    g_menu_draw->sprite(mc_sprites::TITLE_MINECRAFT, logo_x, logo_y, scale);
 
     float btn_w = 200.0f * scale;
     float btn_h = 20.0f * scale;

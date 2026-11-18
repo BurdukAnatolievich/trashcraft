@@ -85,8 +85,8 @@ void c_menu_draw::sprite(c_texture* texture, float x, float y, float u, float v,
     ImVec2 p_min(x, y);
     ImVec2 p_max(x + w * scale, y + h * scale);
 
-    ImVec2 uv_min(u / texture->size.x, v / texture->size.x);
-    ImVec2 uv_max((u + w) / texture->size.x, (v + h) / texture->size.x);
+    ImVec2 uv_min(u / texture->size.x, v / texture->size.y);
+    ImVec2 uv_max((u + w) / texture->size.x, (v + h) / texture->size.y);
 
     ImGui::GetBackgroundDrawList()->AddImage((ImTextureID)texture->id, p_min, p_max, uv_min, uv_max, color);
 }

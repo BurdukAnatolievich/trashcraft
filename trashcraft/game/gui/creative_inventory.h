@@ -15,7 +15,7 @@ class c_creative_inventory : public c_gui_screen
     void handle_slot_click(c_inventory* inventory, slot_entry_t& slot, bool right_click, bool shift_held);
     void render_slot_item(c_inventory_item* item, float x, float y, float scale);
 public:
-    c_survival_inventory() = default;
+    c_creative_inventory() = default;
 
     void update() override;
     void render(float scale) override;

@@ -23,18 +23,17 @@ struct gui_sprite_t {
 };
 
 namespace mc_sprites {
-    constexpr gui_sprite_t HOTBAR = { "widgets", 0, 0, 182, 22 };
-    constexpr gui_sprite_t HOTBAR_SELECTOR = { "widgets", 0, 22, 24, 24 };
+    constexpr gui_sprite_t HOTBAR = { "gui", 0, 0, 182, 22 };
+    constexpr gui_sprite_t HOTBAR_SELECTOR = { "gui", 0, 22, 24, 24 };
 
-    constexpr gui_sprite_t BUTTON_DISABLED = { "widgets", 0, 46, 200, 20 };
-    constexpr gui_sprite_t BUTTON_NORMAL = { "widgets", 0, 66, 200, 20 };
-    constexpr gui_sprite_t BUTTON_HOVERED = { "widgets", 0, 86, 200, 20 };
+    constexpr gui_sprite_t BUTTON_DISABLED = { "gui", 0, 46, 200, 20 };
+    constexpr gui_sprite_t BUTTON_NORMAL = { "gui", 0, 66, 200, 20 };
+    constexpr gui_sprite_t BUTTON_HOVERED = { "gui", 0, 86, 200, 20 };
 
-    constexpr gui_sprite_t TITLE_MINE = { "title_logo", 0,  0, 155, 44 };
-    constexpr gui_sprite_t TITLE_CRAFT = { "title_logo", 0, 45, 155, 44 };
+    constexpr gui_sprite_t TITLE_MINECRAFT = { "crash_logo", 0, 0, 274, 44 };
 
     constexpr gui_sprite_t INVENTORY_BG = { "inventory", 0, 0, 176, 166 };
-    constexpr gui_sprite_t CRAFTING_TABLE_BG = { "crafting_table", 0, 0, 176, 166 };
+    constexpr gui_sprite_t CRAFTING_TABLE_BG = { "crafting", 0, 0, 176, 166 };
 
     constexpr gui_sprite_t FURNACE_BG = { "furnace", 0, 0, 176, 166 };
     constexpr gui_sprite_t FURNACE_FLAME = { "furnace", 176, 0, 14, 14 };
@@ -53,7 +52,7 @@ namespace mc_sprites {
     constexpr gui_sprite_t XP_BAR_BG = { "icons", 0, 64, 182, 5 };
     constexpr gui_sprite_t XP_BAR_FULL = { "icons", 0, 69, 182, 5 };
 
-    constexpr gui_sprite_t DIRT_BG = { "options_background", 0, 0, 16, 16 };
+    constexpr gui_sprite_t DIRT_BG = { "background", 0, 0, 16, 16 };
 
     constexpr gui_sprite_t CREATIVE_BG = { "allitems", 0, 0, 176, 208 };
     constexpr gui_sprite_t CREATIVE_SCROLL_THUMB = { "allitems", 176, 0, 12, 15 };
