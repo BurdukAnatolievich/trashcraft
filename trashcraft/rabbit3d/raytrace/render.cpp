@@ -520,7 +520,7 @@ void c_render::render_viewmodel()
     //hand = glm::translate(hand, glm::vec3(0.56f, -0.52f, -0.72f));
 
     c_player_animation_state* anim_state = local->get_anim_state();
-    if (held_item->type == c_item::e_type::BLOCK) {
+    if (held_model && held_item->type == c_item::e_type::BLOCK) {
 		glm::mat4 hand = get_hand_block_matrix(anim_state ? anim_state->firstperson_hand_swing : 0.0f, 1.0f);
         current_shader->set_mat4("model", inv_view * hand);
 

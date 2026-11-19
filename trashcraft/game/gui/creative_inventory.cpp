@@ -65,8 +65,13 @@ void c_creative_inventory::handle_slot_click(c_inventory* inventory, slot_entry_
 
 void c_creative_inventory::update()
 {
-    int total_items = static_cast<int>(g_global_vars->items.size());
-    int total_rows = std::max(0, (total_items + 7) / 8 - 8);
+    int valid_items = 0;
+    for (const auto& pair : g_global_vars->items) {
+        if (pair.second && pair.second->numeric_id != 0)
+            ++valid_items;
+    }
+
+    int total_rows = std::max(0, (valid_items + 7) / 8 - 8);
 
     if (total_rows <= 0) {
         scroll_progress = 0.0f;
@@ -102,42 +107,67 @@ bool c_creative_inventory::on_mouse_click(int button, float x, float y)
         return false;
 
     c_menu_draw::rect_size_t display = g_menu_draw->screen_size();
-    float inv_x = std::floor((display.width - 176.0f * last_scale) * 0.5f);
-    float inv_y = std::floor((display.height - 208.0f * last_scale) * 0.5f);
+    float inv_w = 176.0f * last_scale;
+    float inv_h = 208.0f * last_scale;
+    float inv_x = std::floor((display.width - inv_w) * 0.5f);
+    float inv_y = std::floor((display.height - inv_h) * 0.5f);
     float slot_size = 16.0f * last_scale;
 
-    // 1. Клик по скроллбару
-    float sb_x = inv_x + 155.0f * last_scale;
-    float sb_y = inv_y + 18.0f * last_scale;
+    int valid_items = 0;
+    for (const auto& pair : g_global_vars->items) {
+        if (pair.second && pair.second->numeric_id != 0)
+            ++valid_items;
+    }
+    int total_rows = std::max(0, (valid_items + 7) / 8 - 8);
+
+    float sb_x = std::floor(inv_x + 156.0f * last_scale);
+    float sb_y = std::floor(inv_y + 18.0f * last_scale);
+    float sb_h = 142.0f * last_scale;
     if (button == ImGuiKey_MouseLeft &&
         x >= sb_x && x < sb_x + 12.0f * last_scale &&
-        y >= sb_y && y < sb_y + 144.0f * last_scale) {
-        is_scrolling = true;
+        y >= sb_y && y < sb_y + sb_h) {
+        if (total_rows > 0) {
+            is_scrolling = true;
+            float thumb_h = 15.0f * last_scale;
+            float rel_y = y - sb_y - thumb_h * 0.5f;
+            scroll_progress = std::clamp(rel_y / (sb_h - thumb_h), 0.0f, 1.0f);
+        }
         return true;
     }
 
-    // 2. Клик по сетке каталога 8x8 напрямую
-    int total_items = static_cast<int>(g_global_vars->items.size());
-    int total_rows = std::max(0, (total_items + 7) / 8 - 8);
-    int skip = static_cast<int>(scroll_progress * total_rows + 0.5f) * 8;
+    bool shift_held = g_input->is_key_down(ImGuiKey_LeftShift) || g_input->is_key_down(ImGuiKey_RightShift);
 
+    int skip = static_cast<int>(scroll_progress * total_rows + 0.5f) * 8;
     auto it = g_global_vars->items.begin();
-    std::advance(it, std::min(skip, total_items));
+    int skipped = 0;
+    while (it != g_global_vars->items.end() && skipped < skip) {
+        if (it->second && it->second->numeric_id != 0)
+            ++skipped;
+        ++it;
+    }
 
     for (int i = 0; i < 64; ++i) {
         while (it != g_global_vars->items.end() && (!it->second || it->second->numeric_id == 0))
             ++it;
 
-        float sx = inv_x + (8.0f + (i % 8) * 18.0f) * last_scale;
-        float sy = inv_y + (18.0f + (i / 8) * 18.0f) * last_scale;
+        float sx = std::floor(inv_x + (8.0f + (i % 8) * 18.0f) * last_scale);
+        float sy = std::floor(inv_y + (18.0f + (i / 8) * 18.0f) * last_scale);
 
         if (x >= sx && x < sx + slot_size && y >= sy && y < sy + slot_size) {
             if (!cursor_item.is_empty()) {
-                cursor_item.reset();
+                if (it != g_global_vars->items.end() && cursor_item.id == it->second->numeric_id) {
+                    int max_stack = cursor_item.get_ptr() ? cursor_item.get_ptr()->max_count : it->second->max_count;
+                    int add = (shift_held || button == ImGuiKey_MouseRight) ? max_stack : 1;
+                    cursor_item = c_inventory_item(it->second->numeric_id, std::min(max_stack, cursor_item.count + add));
+                }
+                else {
+                    cursor_item.reset();
+                }
             }
             else if (it != g_global_vars->items.end()) {
-                cursor_item.id = it->second->numeric_id;
-                cursor_item.count = (button == ImGuiKey_MouseRight) ? 64 : 1;
+                int max_stack = it->second->max_count > 0 ? it->second->max_count : 1;
+                int take_count = (shift_held || button == ImGuiKey_MouseRight) ? max_stack : 1;
+                cursor_item = c_inventory_item(it->second->numeric_id, take_count);
             }
             return true;
         }
@@ -146,14 +176,12 @@ bool c_creative_inventory::on_mouse_click(int button, float x, float y)
             ++it;
     }
 
-    // 3. Клик по слотам хотбара
     slot_entry_t slots[INVENTORY_BAR_SIZE];
     int count = build_slots(&local->inventory, slots);
-    bool shift_held = g_input->is_key_down(ImGuiKey_LeftShift) || g_input->is_key_down(ImGuiKey_RightShift);
 
     for (int i = 0; i < count; ++i) {
-        float sx = inv_x + slots[i].x * last_scale;
-        float sy = inv_y + slots[i].y * last_scale;
+        float sx = std::floor(inv_x + slots[i].x * last_scale);
+        float sy = std::floor(inv_y + slots[i].y * last_scale);
 
         if (x >= sx && x < sx + slot_size && y >= sy && y < sy + slot_size) {
             handle_slot_click(&local->inventory, slots[i], button == ImGuiKey_MouseRight, shift_held);
@@ -161,13 +189,22 @@ bool c_creative_inventory::on_mouse_click(int button, float x, float y)
         }
     }
 
+    if (!cursor_item.is_empty() && (x < inv_x || x >= inv_x + inv_w || y < inv_y || y >= inv_y + inv_h)) {
+        cursor_item.reset();
+        return true;
+    }
+
     return false;
 }
 
 bool c_creative_inventory::on_mouse_scroll(int direction)
 {
-    int total_items = static_cast<int>(g_global_vars->items.size());
-    int total_rows = std::max(0, (total_items + 7) / 8 - 8);
+    int valid_items = 0;
+    for (const auto& pair : g_global_vars->items) {
+        if (pair.second && pair.second->numeric_id != 0)
+            ++valid_items;
+    }
+    int total_rows = std::max(0, (valid_items + 7) / 8 - 8);
 
     if (total_rows > 0 && direction != 0) {
         float step = 1.0f / static_cast<float>(total_rows);
@@ -198,68 +235,71 @@ void c_creative_inventory::render(float scale)
     g_menu_draw->sprite(mc_sprites::CREATIVE_BG, inv_x, inv_y, scale);
     g_menu_draw->text("Item selection", std::floor(inv_x + 8.0f * scale), std::floor(inv_y + 6.0f * scale), scale, false, IM_COL32(64, 64, 64, 255));
 
-    // Ползунок скроллбара
-    float sb_x = std::floor(inv_x + 155.0f * scale);
+    int valid_items = 0;
+    for (const auto& pair : g_global_vars->items) {
+        if (pair.second && pair.second->numeric_id != 0)
+            ++valid_items;
+    }
+    int total_rows = std::max(0, (valid_items + 7) / 8 - 8);
+    float scroll = (total_rows > 0) ? std::clamp(scroll_progress, 0.0f, 1.0f) : 0.0f;
+
+    float sb_x = std::floor(inv_x + 156.0f * scale);
     float sb_y = std::floor(inv_y + 18.0f * scale);
-    float sb_w = 12.0f * scale;
+
     float sb_h = 144.0f * scale;
     float thumb_h = 15.0f * scale;
-    float thumb_y = std::floor(sb_y + scroll_progress * (sb_h - thumb_h));
 
-    g_menu_draw->rect_filled(sb_x, thumb_y, sb_w, thumb_h, IM_COL32(198, 198, 198, 255));
-    g_menu_draw->rect_filled(sb_x, thumb_y, sb_w - scale, scale, IM_COL32(255, 255, 255, 255));
-    g_menu_draw->rect_filled(sb_x, thumb_y, scale, thumb_h - scale, IM_COL32(255, 255, 255, 255));
-    g_menu_draw->rect_filled(sb_x + scale, thumb_y + thumb_h - scale, sb_w - scale, scale, IM_COL32(85, 85, 85, 255));
-    g_menu_draw->rect_filled(sb_x + sb_w - scale, thumb_y + scale, scale, thumb_h - scale, IM_COL32(85, 85, 85, 255));
+    float thumb_y = std::floor(sb_y + scroll * (sb_h - thumb_h));
+
+    g_menu_draw->sprite(mc_sprites::CREATIVE_SCROLL_THUMB, sb_x, thumb_y, scale);
 
     glm::vec2 mouse_pos = g_input->get_mouse_position();
     float slot_size = 16.0f * scale;
 
-    // 1. Прямой рендер сетки каталога 8x8
-    int total_items = static_cast<int>(g_global_vars->items.size());
-    int total_rows = std::max(0, (total_items + 7) / 8 - 8);
-    int skip = static_cast<int>(scroll_progress * total_rows + 0.5f) * 8;
-
+    int skip = static_cast<int>(scroll * total_rows + 0.5f) * 8;
     auto it = g_global_vars->items.begin();
-    std::advance(it, std::min(skip, total_items));
+    int skipped = 0;
+    while (it != g_global_vars->items.end() && skipped < skip) {
+        if (it->second && it->second->numeric_id != 0)
+            ++skipped;
+        ++it;
+    }
 
     for (int i = 0; i < 64; ++i) {
         while (it != g_global_vars->items.end() && (!it->second || it->second->numeric_id == 0))
             ++it;
 
-        float sx = inv_x + (8.0f + (i % 8) * 18.0f) * scale;
-        float sy = inv_y + (18.0f + (i / 8) * 18.0f) * scale;
-
-        if (mouse_pos.x >= sx && mouse_pos.x < sx + slot_size &&
-            mouse_pos.y >= sy && mouse_pos.y < sy + slot_size) {
-            g_menu_draw->rect_filled(sx, sy, slot_size, slot_size, IM_COL32(255, 255, 255, 128));
-        }
+        float sx = std::floor(inv_x + (8.0f + (i % 8) * 18.0f) * scale);
+        float sy = std::floor(inv_y + (18.0f + (i / 8) * 18.0f) * scale);
 
         if (it != g_global_vars->items.end()) {
             c_inventory_item temp(it->second->numeric_id, 1);
             render_slot_item(&temp, sx, sy, scale);
             ++it;
         }
-    }
-
-    // 2. Рендер 9 слотов хотбара
-    slot_entry_t slots[INVENTORY_BAR_SIZE];
-    int count = build_slots(&local->inventory, slots);
-
-    for (int i = 0; i < count; ++i) {
-        float sx = inv_x + slots[i].x * scale;
-        float sy = inv_y + slots[i].y * scale;
 
         if (mouse_pos.x >= sx && mouse_pos.x < sx + slot_size &&
             mouse_pos.y >= sy && mouse_pos.y < sy + slot_size) {
             g_menu_draw->rect_filled(sx, sy, slot_size, slot_size, IM_COL32(255, 255, 255, 128));
         }
-
-        render_slot_item(slots[i].item, sx, sy, scale);
     }
 
-    // 3. Предмет на курсоре
+    slot_entry_t slots[INVENTORY_BAR_SIZE];
+    int count = build_slots(&local->inventory, slots);
+
+    for (int i = 0; i < count; ++i) {
+        float sx = std::floor(inv_x + slots[i].x * scale);
+        float sy = std::floor(inv_y + slots[i].y * scale);
+
+        render_slot_item(slots[i].item, sx, sy, scale);
+
+        if (mouse_pos.x >= sx && mouse_pos.x < sx + slot_size &&
+            mouse_pos.y >= sy && mouse_pos.y < sy + slot_size) {
+            g_menu_draw->rect_filled(sx, sy, slot_size, slot_size, IM_COL32(255, 255, 255, 128));
+        }
+    }
+
     if (!cursor_item.is_empty()) {
-        render_slot_item(&cursor_item, mouse_pos.x - slot_size * 0.5f, mouse_pos.y - slot_size * 0.5f, scale);
+        render_slot_item(&cursor_item, std::floor(mouse_pos.x - slot_size * 0.5f), std::floor(mouse_pos.y - slot_size * 0.5f), scale);
     }
 }

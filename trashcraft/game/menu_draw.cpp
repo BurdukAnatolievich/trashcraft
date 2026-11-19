@@ -82,6 +82,11 @@ void c_menu_draw::sprite(c_texture* texture, float x, float y, float u, float v,
         return;
     }
 
+    if (w == 0.0f)
+        w = texture->size.x;
+    if (h == 0.0f)
+		h = texture->size.y;
+
     ImVec2 p_min(x, y);
     ImVec2 p_max(x + w * scale, y + h * scale);
 
@@ -182,7 +187,7 @@ void c_menu_draw::draw_items(c_inventory_item* item, float x, float y, float sca
         draw_iso_block(static_cast<c_block*>(item_ptr), x, y, size);
     }
     else if (item_ptr->item_material) {
-        sprite(item_ptr->item_material, x, y, 0.0f, 0.0f, 1.0f, 1.0f, scale);
+        sprite(item_ptr->item_material, x, y, 0.0f, 0.0f, 0.0f, 0.0f, scale);
     }
 
     if (item->count > 1) {

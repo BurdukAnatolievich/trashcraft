@@ -34,8 +34,9 @@ enum e_buttons
     IN_MOVE_RIGHT = (1 << 3),
     IN_MOVE_BACKWARD = (1 << 4),
     IN_SPRINT = (1 << 5),
-    IN_ATTACK = (1 << 6),
-    IN_ACTION = (1 << 7),
+	IN_DUCK = (1 << 6),
+    IN_ATTACK = (1 << 7),
+    IN_ACTION = (1 << 8),
 };
 
 struct accumulated_input_t

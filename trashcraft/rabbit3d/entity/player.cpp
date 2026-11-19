@@ -306,48 +306,69 @@ void c_player::create_move()
             move_yaw = view_angle.y + 180.0f;
     }
 
-    float yaw_radians = glm::radians(move_yaw);
+    bool is_sneaking = (input.buttons & e_buttons::IN_DUCK) != 0;
 
-    glm::vec3 wish_dir = glm::vec3(-sin(yaw_radians), 0.0f, cos(yaw_radians));
+    if (is_sneaking) {
+        is_sprinting = false;
+    }
+
+    float yaw_radians = glm::radians(move_yaw);
+    glm::vec3 wish_dir = glm::vec3(-std::sin(yaw_radians), 0.0f, std::cos(yaw_radians));
     if (glm::length(wish_dir) > 0.0f) {
         wish_dir = glm::normalize(wish_dir);
     }
 
-    if (!moving_forward && !moving_backward && !moving_right && !moving_left)
+    if (!moving_forward && !moving_backward && !moving_right && !moving_left) {
         wish_dir = glm::vec3(0.0f);
-
-    if (!is_on_ground) {
-        velocity.y -= 0.08f;
-        if (velocity.y < -3.92f)
-            velocity.y = -3.92f;
-    }
-    else {
-        if (velocity.y < 0.0f)
-            velocity.y = 0.0f;
     }
 
+    float move_factor = is_sneaking ? 0.3f : 1.0f;
     if ((input.buttons & e_buttons::IN_JUMP) && is_on_ground) {
         velocity.y = 0.42f;
         is_on_ground = false;
 
         if (is_sprinting) {
-            velocity += wish_dir * 0.2f;
+            velocity.x += wish_dir.x * 0.2f;
+            velocity.z += wish_dir.z * 0.2f;
         }
     }
 
-    float friction = is_on_ground ? 0.546f : 0.91f;
+	float slipperiness = 0.6f;
+    float friction = is_on_ground ? (slipperiness * 0.91f) : 0.91f;
 
-    float base_accel = is_on_ground ? 0.1f : 0.02f;
-    float acceleration_factor = is_sprinting ? (base_accel * 1.3f) : base_accel;
+    float base_accel = is_on_ground
+        ? (0.1f * (0.16277136f / (friction * friction * friction)))
+        : 0.02f;
+
+    float acceleration_factor = (is_sprinting ? (base_accel * 1.3f) : base_accel) * move_factor;
 
     velocity.x += wish_dir.x * acceleration_factor;
     velocity.z += wish_dir.z * acceleration_factor;
 
-    bool stood_on_ground = false;
-    bool collided_horizontally = false; 
+    if (std::abs(velocity.x) < 0.005f) velocity.x = 0.0f;
+    if (std::abs(velocity.y) < 0.005f) velocity.y = 0.0f;
+    if (std::abs(velocity.z) < 0.005f) velocity.z = 0.0f;
+
+    const float half_width = 0.3f;
+    const float player_height = 1.8f;
+    const float eps = 0.00001f;
+
+    auto get_player_box = [&](const glm::vec3& pos) -> aabb_t {
+        return {
+            pos + glm::vec3(-half_width, 0.0f, -half_width),
+            pos + glm::vec3(half_width, player_height, half_width)
+        };
+        };
+
+    auto collides_any = [&](const aabb_t& box, const std::vector<aabb_t>& blocks) -> bool {
+        for (const auto& block_box : blocks) {
+            if (g_physics->check_aabb_collision(box, block_box))
+                return true;
+        }
+        return false;
+        };
 
     glm::ivec3 round_pos = glm::ivec3(glm::floor(origin));
-    glm::vec3 current_pos = origin;
 
     std::vector<aabb_t> target_blocks;
     for (int y = -1; y <= 2; y++) {
@@ -366,55 +387,75 @@ void c_player::create_move()
         }
     }
 
-    const float half_width = 0.3f;
-    const float player_height = 1.8f;
-    const float eps = 0.00001f;
+    glm::vec3 move_vec = velocity;
+    if (is_on_ground && is_sneaking) {
+        const float step = 0.05f;
 
-    auto get_current_player_box = [&](const glm::vec3& pos) -> aabb_t {
-        return {
-            pos + glm::vec3(-half_width, 0.0f, -half_width),
-            pos + glm::vec3(half_width, player_height, half_width)
-        };
-        };
+        while (move_vec.x != 0.0f && !collides_any(get_player_box(origin + glm::vec3(move_vec.x, -1.0f, 0.0f)), target_blocks)) {
+            if (move_vec.x < step && move_vec.x >= -step) move_vec.x = 0.0f;
+            else if (move_vec.x > 0.0f) move_vec.x -= step;
+            else move_vec.x += step;
+        }
 
-    current_pos.x += velocity.x;
-    aabb_t player_box = get_current_player_box(current_pos);
-    for (const auto& block_box : target_blocks) {
-        if (g_physics->check_aabb_collision(player_box, block_box)) {
-            if (velocity.x > 0.0f) current_pos.x = block_box.min.x - half_width - eps;
-            else if (velocity.x < 0.0f) current_pos.x = block_box.max.x + half_width + eps;
-            velocity.x = 0.0f;
-            collided_horizontally = true;
-            player_box = get_current_player_box(current_pos);
+        while (move_vec.z != 0.0f && !collides_any(get_player_box(origin + glm::vec3(0.0f, -1.0f, move_vec.z)), target_blocks)) {
+            if (move_vec.z < step && move_vec.z >= -step) move_vec.z = 0.0f;
+            else if (move_vec.z > 0.0f) move_vec.z -= step;
+            else move_vec.z += step;
+        }
+
+        while (move_vec.x != 0.0f && move_vec.z != 0.0f &&
+            !collides_any(get_player_box(origin + glm::vec3(move_vec.x, -1.0f, move_vec.z)), target_blocks)) {
+            if (move_vec.x < step && move_vec.x >= -step) move_vec.x = 0.0f;
+            else if (move_vec.x > 0.0f) move_vec.x -= step;
+            else move_vec.x += step;
+
+            if (move_vec.z < step && move_vec.z >= -step) move_vec.z = 0.0f;
+            else if (move_vec.z > 0.0f) move_vec.z -= step;
+            else move_vec.z += step;
         }
     }
 
-    current_pos.z += velocity.z;
-    player_box = get_current_player_box(current_pos);
-    for (const auto& block_box : target_blocks) {
-        if (g_physics->check_aabb_collision(player_box, block_box)) {
-            if (velocity.z > 0.0f) current_pos.z = block_box.min.z - half_width - eps;
-            else if (velocity.z < 0.0f) current_pos.z = block_box.max.z + half_width + eps;
-            velocity.z = 0.0f;
-            collided_horizontally = true;
-            player_box = get_current_player_box(current_pos);
-        }
-    }
+    glm::vec3 current_pos = origin;
+    bool stood_on_ground = false;
+    bool collided_horizontally = false;
 
-    current_pos.y += velocity.y;
-    player_box = get_current_player_box(current_pos);
+    current_pos.y += move_vec.y;
+    aabb_t player_box = get_player_box(current_pos);
     for (const auto& block_box : target_blocks) {
         if (g_physics->check_aabb_collision(player_box, block_box)) {
-            if (velocity.y > 0.0f) {
+            if (move_vec.y > 0.0f) {
                 current_pos.y = block_box.min.y - player_height - eps;
-                velocity.y = 0.0f;
             }
-            else if (velocity.y < 0.0f) {
+            else if (move_vec.y < 0.0f) {
                 current_pos.y = block_box.max.y + eps;
-                velocity.y = 0.0f;
                 stood_on_ground = true;
             }
-            player_box = get_current_player_box(current_pos);
+            velocity.y = 0.0f;
+            player_box = get_player_box(current_pos);
+        }
+    }
+
+    current_pos.x += move_vec.x;
+    player_box = get_player_box(current_pos);
+    for (const auto& block_box : target_blocks) {
+        if (g_physics->check_aabb_collision(player_box, block_box)) {
+            if (move_vec.x > 0.0f) current_pos.x = block_box.min.x - half_width - eps;
+            else if (move_vec.x < 0.0f) current_pos.x = block_box.max.x + half_width + eps;
+            velocity.x = 0.0f;
+            collided_horizontally = true;
+            player_box = get_player_box(current_pos);
+        }
+    }
+
+    current_pos.z += move_vec.z;
+    player_box = get_player_box(current_pos);
+    for (const auto& block_box : target_blocks) {
+        if (g_physics->check_aabb_collision(player_box, block_box)) {
+            if (move_vec.z > 0.0f) current_pos.z = block_box.min.z - half_width - eps;
+            else if (move_vec.z < 0.0f) current_pos.z = block_box.max.z + half_width + eps;
+            velocity.z = 0.0f;
+            collided_horizontally = true;
+            player_box = get_player_box(current_pos);
         }
     }
 
@@ -425,9 +466,14 @@ void c_player::create_move()
     is_on_ground = stood_on_ground;
     origin = current_pos;
 
+    velocity.y -= 0.08f;
+    velocity.y *= 0.98f;
+    if (velocity.y < -3.92f) {
+        velocity.y = -3.92f;
+    }
+
     velocity.x *= friction;
     velocity.z *= friction;
-    velocity.y *= 0.98f;
 }
 
 void c_player::update()

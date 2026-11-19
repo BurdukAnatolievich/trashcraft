@@ -21,7 +21,7 @@ c_tree::c_tree(std::string id_, c_block* log_, c_block* leaf_, int height_, int 
 
 void c_world::initialize_structures()
 {
-    trees.push_back(c_tree("cherry_tree", (c_block*)g_global_vars->items["cherry_log"], (c_block*)g_global_vars->items["cherry_leaves"], 7, 3));
+    //trees.push_back(c_tree("cherry_tree", (c_block*)g_global_vars->items["cherry_log"], (c_block*)g_global_vars->items["cherry_leaves"], 7, 3));
 }
 
 void c_world::set_generator_seed(uint32_t seed)
@@ -103,81 +103,63 @@ void c_world::generate_chunk(world_chunk_t* chunk)
     uint16_t id_stone = get_block_id("stone", 1);
     uint16_t id_grass = get_block_id("grass_block", id_stone);
     uint16_t id_dirt = get_block_id("dirt", id_stone);
-    uint16_t id_bedrock = get_block_id("stone", id_stone);
+    uint16_t id_bedrock = get_block_id("bedrock", id_stone);
     uint16_t id_sand = get_block_id("sand", id_dirt);
+    uint16_t id_gravel = get_block_id("gravel", id_stone);
     uint16_t id_water = get_block_id("water", 0);
-    uint16_t id_log = get_block_id("cherry_log", 0);
-    uint16_t id_leaves = get_block_id("cherry_leaves", 0);
+    uint16_t id_log = get_block_id("oak_log", 0);
 
-    constexpr int sea_level = WORLD_HEIGHT / 3;
-    int surface_map[CHUNK_SIZE][CHUNK_SIZE];
+    // Ищем листву по всем возможным именам в регистре (с откатом на cherry_leaves, если oak_leaves не заведены)
+    uint16_t id_leaves = get_block_id("oak_leaves", 0);
+    if (id_leaves == 0) id_leaves = get_block_id("leaves", 0);
+    if (id_leaves == 0) id_leaves = get_block_id("cherry_leaves", 0);
 
+    uint16_t id_coal = get_block_id("coal_ore", id_stone);
+    uint16_t id_iron = get_block_id("iron_ore", id_stone);
+    uint16_t id_gold = get_block_id("gold_ore", id_stone);
+    uint16_t id_diamond = get_block_id("diamond_ore", id_stone);
+
+    constexpr int sea_level = WORLD_HEIGHT / 2 - 1; // 63 при высоте 128
+
+    // 1. Базовый альфовский 3D-рельеф (скалы, утесы, равнины)
     for (int z = 0; z < CHUNK_SIZE; z++) {
         int world_z = world_chunk_z + z;
         for (int x = 0; x < CHUNK_SIZE; x++) {
             int world_x = world_chunk_x + x;
 
-            double continental = perlin_noise.octave2D_01(world_x * 0.004, world_z * 0.004, 4);
-            double hills = perlin_noise.octave2D_01(world_x * 0.015, world_z * 0.015, 4);
-            double detail = perlin_noise.octave2D_01(world_x * 0.05, world_z * 0.05, 2);
+            double scale_noise = perlin_noise.octave2D_01(world_x * 0.008, world_z * 0.008, 3);
+            double depth_noise = perlin_noise.octave2D_01(world_x * 0.003 + 100.0, world_z * 0.003 + 100.0, 4);
 
-            double mountain_factor = std::pow(continental, 2.2) * 38.0;
-            double hill_factor = hills * 12.0;
-            double detail_factor = (detail - 0.5) * 3.0;
-
-            int height = static_cast<int>(sea_level - 4 + mountain_factor + hill_factor + detail_factor);
-            height = std::clamp(height, 4, WORLD_HEIGHT - 12);
-
-            surface_map[x][z] = height;
-        }
-    }
-
-    for (int z = 0; z < CHUNK_SIZE; z++) {
-        int world_z = world_chunk_z + z;
-        for (int x = 0; x < CHUNK_SIZE; x++) {
-            int world_x = world_chunk_x + x;
-            int surface_y = surface_map[x][z];
-
-            uint32_t col_hash = static_cast<uint32_t>(world_x * 374761393 + world_z * 668265263);
-            col_hash = (col_hash ^ (col_hash >> 13)) * 1274126177;
-            int dirt_depth = 3 + (col_hash & 1);
-            int bedrock_height = 1 + ((col_hash >> 4) % 3);
+            double base_height = sea_level - 6.0 + depth_noise * 22.0;
+            double stretch = 6.0 + std::pow(scale_noise, 2.5) * 26.0;
 
             for (int y = 0; y < WORLD_HEIGHT; y++) {
                 uint16_t block_to_set = 0;
 
-                if (y < bedrock_height) {
+                if (y == 0) {
                     block_to_set = id_bedrock;
                 }
-                else if (y <= surface_y) {
-                    bool is_cave = false;
-                    if (y > 4 && y < surface_y - 2) {
-                        double cave_noise = perlin_noise.octave3D_01(
-                            world_x * 0.045,
-                            y * 0.065,
-                            world_z * 0.045,
-                            2
-                        );
+                else if (y < WORLD_HEIGHT - 1) {
+                    double n3d = perlin_noise.octave3D_01(
+                        world_x * 0.022,
+                        y * 0.035,
+                        world_z * 0.022,
+                        4
+                    );
 
-                        if (cave_noise > 0.72) {
-                            is_cave = true;
-                        }
+                    double density = (n3d - 0.5) * 2.0 * stretch - (static_cast<double>(y) - base_height);
+
+                    if (y > WORLD_HEIGHT - 16) {
+                        double top_fade = static_cast<double>(y - (WORLD_HEIGHT - 16)) / 16.0;
+                        density -= top_fade * 25.0;
                     }
 
-                    if (!is_cave) {
-                        if (y == surface_y) {
-                            block_to_set = (surface_y <= sea_level + 1) ? id_sand : id_grass;
-                        }
-                        else if (y >= surface_y - dirt_depth) {
-                            block_to_set = (surface_y <= sea_level + 1) ? id_sand : id_dirt;
-                        }
-                        else {
-                            block_to_set = id_stone;
-                        }
+                    if (density > 0.0) {
+                        block_to_set = id_stone;
                     }
-                }
-                else if (y <= sea_level && id_water != 0) {
-                    block_to_set = id_water;
+                    else if (y <= sea_level && id_water != 0) {
+                        block_to_set = id_water;
+                    }
                 }
 
                 chunk->blocks[REL_POS_TO_IDX(x, y, z)] = block_to_set;
@@ -185,44 +167,177 @@ void c_world::generate_chunk(world_chunk_t* chunk)
         }
     }
 
+    // 2. Подземные пещеры и руды (строго внутри камня, до укладки травы/земли!)
+    for (int z = 0; z < CHUNK_SIZE; z++) {
+        int world_z = world_chunk_z + z;
+        for (int x = 0; x < CHUNK_SIZE; x++) {
+            int world_x = world_chunk_x + x;
+
+            for (int y = 5; y < WORLD_HEIGHT - 10; y++) {
+                int idx = REL_POS_TO_IDX(x, y, z);
+                if (chunk->blocks[idx] != id_stone)
+                    continue;
+
+                // Защита поверхности и дна океана (оставляем минимум 4 блока крыши над пещерой)
+                bool near_surface_or_water = false;
+                for (int check_y = 1; check_y <= 4; check_y++) {
+                    if (y + check_y < WORLD_HEIGHT) {
+                        uint16_t above = chunk->blocks[REL_POS_TO_IDX(x, y + check_y, z)];
+                        if (above == 0 || above == id_water) {
+                            near_surface_or_water = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!near_surface_or_water) {
+                    double c1 = perlin_noise.octave3D_01(world_x * 0.03, y * 0.045, world_z * 0.03, 2) - 0.5;
+                    double c2 = perlin_noise.octave3D_01(world_x * 0.03 + 250.0, y * 0.045 + 250.0, world_z * 0.03 + 250.0, 2) - 0.5;
+
+                    if (std::abs(c1) < 0.045 && std::abs(c2) < 0.045) {
+                        chunk->blocks[idx] = 0;
+                        continue;
+                    }
+                }
+
+                // Генерация руд
+                uint32_t h = static_cast<uint32_t>(world_x * 73856093 ^ y * 19349663 ^ world_z * 83492791);
+                h ^= (h >> 15);
+                h *= 0x2c1b3c6d;
+                h ^= (h >> 12);
+
+                uint32_t roll = h % 1000;
+                if (y < 16 && roll < 3) chunk->blocks[idx] = id_diamond;
+                else if (y < 32 && roll < 7) chunk->blocks[idx] = id_gold;
+                else if (y < 64 && roll < 18) chunk->blocks[idx] = id_iron;
+                else if (roll < 35) chunk->blocks[idx] = id_coal;
+            }
+        }
+    }
+
+    // 3. Поверхностный слой (трава, земля, пляжи, бедрок) — укладывается ПОСЛЕ пещер, чтобы земля не была дырявой
+    for (int z = 0; z < CHUNK_SIZE; z++) {
+        int world_z = world_chunk_z + z;
+        for (int x = 0; x < CHUNK_SIZE; x++) {
+            int world_x = world_chunk_x + x;
+
+            uint32_t col_hash = static_cast<uint32_t>(world_x * 374761393 + world_z * 668265263);
+            col_hash = (col_hash ^ (col_hash >> 13)) * 1274126177;
+
+            double beach_noise = perlin_noise.octave2D_01(world_x * 0.03 + 500.0, world_z * 0.03 + 500.0, 2);
+            bool is_sand_beach = beach_noise > 0.42;
+            bool is_gravel_beach = beach_noise < 0.18;
+
+            int dirt_depth = 3 + (col_hash & 1);
+            int run_depth = -1;
+
+            for (int y = WORLD_HEIGHT - 1; y >= 0; y--) {
+                if (y <= static_cast<int>((col_hash >> ((y & 7) * 3)) % 5)) {
+                    chunk->blocks[REL_POS_TO_IDX(x, y, z)] = id_bedrock;
+                    continue;
+                }
+
+                int idx = REL_POS_TO_IDX(x, y, z);
+                uint16_t cur = chunk->blocks[idx];
+
+                if (cur == 0 || cur == id_water) {
+                    run_depth = -1;
+                }
+                else if (cur == id_stone || cur == id_coal || cur == id_iron || cur == id_gold || cur == id_diamond) {
+                    if (run_depth == -1) {
+                        run_depth = dirt_depth;
+
+                        if (y >= sea_level - 1) {
+                            if (y <= sea_level + 1 && is_sand_beach) chunk->blocks[idx] = id_sand;
+                            else if (y <= sea_level + 1 && is_gravel_beach) chunk->blocks[idx] = id_gravel;
+                            else chunk->blocks[idx] = id_grass;
+                        }
+                        else {
+                            chunk->blocks[idx] = is_gravel_beach ? id_gravel : (is_sand_beach ? id_sand : id_dirt);
+                        }
+                    }
+                    else if (run_depth > 0) {
+                        --run_depth;
+                        chunk->blocks[idx] = (y <= sea_level + 1 && is_sand_beach) ? id_sand : id_dirt;
+                    }
+                }
+            }
+        }
+    }
+
+    // 4. Классические дубы из Minecraft Alpha (без UB и с полной кроной)
     if (id_log != 0 && id_leaves != 0) {
         for (int z = 2; z < CHUNK_SIZE - 2; z++) {
             int world_z = world_chunk_z + z;
             for (int x = 2; x < CHUNK_SIZE - 2; x++) {
                 int world_x = world_chunk_x + x;
-                int surface_y = surface_map[x][z];
 
-                if (surface_y <= sea_level + 1 || surface_y > sea_level + 24) {
-                    continue;
+                int surface_y = -1;
+                for (int y = WORLD_HEIGHT - 8; y > sea_level; y--) {
+                    uint16_t b = chunk->blocks[REL_POS_TO_IDX(x, y, z)];
+                    if (b == id_grass) {
+                        surface_y = y;
+                        break;
+                    }
+                    if (b != 0 && b != id_leaves) {
+                        break;
+                    }
                 }
 
-                if (chunk->blocks[REL_POS_TO_IDX(x, surface_y, z)] != id_grass) {
+                if (surface_y == -1)
                     continue;
-                }
 
                 uint32_t h = static_cast<uint32_t>(world_x * 198491317 + world_z * 6542989);
                 h ^= (h >> 16);
                 h *= 0x85ebca6b;
                 h ^= (h >> 13);
 
-                if ((h % 1000) < 15) {
-                    int trunk_height = 4 + ((h >> 10) % 3);
-                    if (surface_y + trunk_height + 2 >= WORLD_HEIGHT) {
+                if ((h % 1000) < 16) {
+                    int trunk_height = 4 + ((h >> 10) % 3); // 4..6 блоков
+                    if (surface_y + trunk_height + 2 >= WORLD_HEIGHT)
                         continue;
+
+                    // Проверяем свободное место под дерево
+                    bool can_grow = true;
+                    for (int cy = surface_y + 1; cy <= surface_y + trunk_height + 1; cy++) {
+                        int r = (cy == surface_y + 1) ? 0 : 2;
+                        for (int cz = z - r; cz <= z + r; cz++) {
+                            for (int cx = x - r; cx <= x + r; cx++) {
+                                uint16_t existing = chunk->blocks[REL_POS_TO_IDX(cx, cy, cz)];
+                                if (existing != 0 && existing != id_leaves) {
+                                    can_grow = false;
+                                    break;
+                                }
+                            }
+                            if (!can_grow) break;
+                        }
+                        if (!can_grow) break;
                     }
 
-                    for (int ly = surface_y + trunk_height - 2; ly <= surface_y + trunk_height + 1; ly++) {
-                        int dy = ly - (surface_y + trunk_height);
-                        int radius = (dy >= 0) ? 1 : 2;
+                    if (!can_grow)
+                        continue;
 
+                    chunk->blocks[REL_POS_TO_IDX(x, surface_y, z)] = id_dirt;
+
+                    // Пышная крона дуба (4 слоя листвы: 2 широких 5x5 внизу и 2 узких 3x3 сверху)
+                    int top_y = surface_y + trunk_height;
+                    for (int ly = top_y - 3; ly <= top_y; ly++) {
+                        int layer_from_top = top_y - ly; // 0 = макушка, 1 = предверхний, 2 и 3 = широкие нижние
+                        int radius = (layer_from_top >= 2) ? 2 : 1;
                         for (int lz = z - radius; lz <= z + radius; lz++) {
+                            int dz = std::abs(lz - z);
                             for (int lx = x - radius; lx <= x + radius; lx++) {
-                                if (std::abs(lx - x) == radius && std::abs(lz - z) == radius) {
-                                    if (dy >= 0 || ((h >> (lx + lz)) & 1)) {
+                                int dx = std::abs(lx - x);
+                                // Срезаем только углы кроны
+                                if (dx == radius && dz == radius) {
+                                    if (layer_from_top == 0) {
+                                        continue; // На самой макушке углы всегда срезаны (крестик 3x3)
+                                    }
+                                    uint32_t bit_idx = static_cast<uint32_t>((ly + lx * 3 + lz * 7) & 31);
+                                    if (((h >> bit_idx) & 1) == 0) {
                                         continue;
                                     }
                                 }
-
                                 int idx = REL_POS_TO_IDX(lx, ly, lz);
                                 if (chunk->blocks[idx] == 0) {
                                     chunk->blocks[idx] = id_leaves;
@@ -230,7 +345,7 @@ void c_world::generate_chunk(world_chunk_t* chunk)
                             }
                         }
                     }
-
+                    // Ствол дуба (oak_log)
                     for (int ty = 1; ty <= trunk_height; ty++) {
                         chunk->blocks[REL_POS_TO_IDX(x, surface_y + ty, z)] = id_log;
                     }

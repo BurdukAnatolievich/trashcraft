@@ -3,6 +3,7 @@
 #include "game.h"
 
 #include "gui/survival_inventory.h"
+#include "gui/creative_inventory.h"
 
 #include <rabbit3d.h>
 
@@ -32,7 +33,7 @@ void c_ui_manager::update()
     }
     else {
         if (g_input->is_bind_pressed(BIND_INVENTORY))
-            g_ui_manager->push_screen(new c_survival_inventory());
+            g_ui_manager->push_screen(new c_creative_inventory());
     }
 }
 
