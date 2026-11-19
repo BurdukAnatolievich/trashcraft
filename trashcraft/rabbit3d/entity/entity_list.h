@@ -38,6 +38,8 @@ public:
     glm::ivec2 chunk = glm::ivec2(0);
     glm::ivec2 last_chunk = glm::ivec2(0);
 
+    glm::ivec2 chunk_shift = glm::ivec2(0);
+
     glm::vec3 velocity = glm::vec3(0.0f);
     glm::vec3 last_velocity = glm::vec3(0.0f);
 
@@ -86,13 +88,8 @@ public:
     inline void set_origin(const glm::vec3& new_origin) { this->origin = new_origin; };
     inline void set_last_origin(const glm::vec3& new_origin) { this->last_origin = new_origin; };
 
-    inline glm::vec3 get_eye_position() { return origin + eye_position; };
-
     inline glm::vec3 get_origin() { return origin; };
-    inline glm::vec3 get_last_origin() { return last_origin; };
-
     inline glm::ivec3 get_abs_origin() { return glm::ivec3(static_cast<int>(origin.x) + chunk.x * CHUNK_SIZE, static_cast<int>(origin.y), static_cast<int>(origin.z) + chunk.y * CHUNK_SIZE); };
-    inline glm::ivec3 get_last_abs_origin() { return glm::ivec3(static_cast<int>(origin.x) + chunk.x * CHUNK_SIZE, static_cast<int>(origin.y), static_cast<int>(origin.z) + chunk.y * CHUNK_SIZE); };
 };
 
 class c_player;

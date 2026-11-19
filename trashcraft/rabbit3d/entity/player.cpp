@@ -212,7 +212,7 @@ void c_player::interact()
 
 void c_player::update_relative_pos()
 {
-    glm::ivec2 chunk_shift = {
+    chunk_shift = {
         static_cast<int>(std::floor(origin.x)) >> CHUNK_SIZE_SHIFT,
         static_cast<int>(std::floor(origin.z)) >> CHUNK_SIZE_SHIFT
     };
@@ -230,10 +230,11 @@ void c_player::update_relative_pos()
 
 void c_player::update_looking_at()
 {
-    glm::vec3 eye_position = get_eye_position();
+    glm::vec3 eye = origin + eye_position;
+    eye += glm::vec3(chunk_shift.x << CHUNK_SIZE_SHIFT, 0, chunk_shift.y << CHUNK_SIZE_SHIFT);
 
     trace_t trace;
-    g_raytrace_utils->voxel_raycast(eye_position, camera->get_forward(), trace, 5);
+    g_raytrace_utils->voxel_raycast(eye, camera->get_forward(), trace, 5);
 
     if (trace.hit) {
         looking_at.block = trace.block;
@@ -488,16 +489,16 @@ void c_player::update()
 
     prepare_collision();
 
-    update_held_item();
-    update_looking_at();
-
     create_move();
+
     update_relative_pos();
+    update_looking_at();
 
     attack();
     interact();
 
     update_model();
+    update_held_item();
 
     //animation_state->update(view_angle.y, view_angle.x);
 
