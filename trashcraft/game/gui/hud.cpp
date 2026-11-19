@@ -36,23 +36,25 @@ void c_hud_overlay::render(float scale)
     int slot = local->inventory.current_hotbar_slot;
     g_menu_draw->sprite(mc_sprites::HOTBAR_SELECTOR, hotbar_x - 1.0f * scale + (slot * 20.0f * scale), hotbar_y - 1.0f * scale, scale);
 
-    int total_hearts = static_cast<int>(std::ceil(local->max_health * 0.5f));
-    int current_hp = static_cast<int>(std::ceil(local->health));
-
-    for (int i = 0; i < total_hearts; i++) {
-        float hx = hotbar_x + i * 8.0f * scale;
-        g_menu_draw->sprite(mc_sprites::HEART_BG, hx, status_y, scale);
-
-        int heart_hp = current_hp - (i * 2);
-        if (heart_hp >= 2) {
-            g_menu_draw->sprite(mc_sprites::HEART_FULL, hx, status_y, scale);
-        }
-        else if (heart_hp == 1) {
-            g_menu_draw->sprite(mc_sprites::HEART_HALF, hx, status_y, scale);
-        }
-    }
-
     for (int i = 0; i < INVENTORY_BAR_SIZE; i++) {
 		g_menu_draw->draw_items(local->inventory.get_hotbar_item(i), hotbar_x + 3.0f * scale + i * 20.0f * scale, hotbar_y + 3.0f * scale, scale);
+    }
+
+    if (local->game_mode != e_game_mode::CREATIVE) {
+        int total_hearts = static_cast<int>(std::ceil(local->max_health * 0.5f));
+        int current_hp = static_cast<int>(std::ceil(local->health));
+
+        for (int i = 0; i < total_hearts; i++) {
+            float hx = hotbar_x + i * 8.0f * scale;
+            g_menu_draw->sprite(mc_sprites::HEART_BG, hx, status_y, scale);
+
+            int heart_hp = current_hp - (i * 2);
+            if (heart_hp >= 2) {
+                g_menu_draw->sprite(mc_sprites::HEART_FULL, hx, status_y, scale);
+            }
+            else if (heart_hp == 1) {
+                g_menu_draw->sprite(mc_sprites::HEART_HALF, hx, status_y, scale);
+            }
+        }
     }
 }

@@ -17,7 +17,7 @@ void c_player_animation_state::update(float eye_yaw, float eye_pitch)
         initialized = true;
     }
 
-    if (owner->attack_progress > 0.0f) {
+    if (owner->attack_progress > 0.0f || owner->interaction_progress > 0.0f) {
         if (!firstperson_swinging) {
             firstperson_hand_swing = 0.08f;
         }

@@ -5,6 +5,7 @@
 #include <inventory.h>
 #include <global_vars.h>
 #include <input.h>
+#include <raytrace/physics.h>
 
 #include <ext.hpp>
 #include <gtx/norm.hpp>
@@ -57,10 +58,14 @@ public:
     int type = e_type::DEFAULT;
     bool should_be_destroyed = false;
 
+    std::vector<aabb_t> target_blocks;
+
     c_scene_object* get_model();
     void set_model(c_scene_object* mdl);
 
     void update_model();
+
+    void prepare_collision();
 
     inline glm::vec3 get_interpolated_abs_origin(float alpha) {
         return glm::mix(last_origin, origin, alpha);

@@ -12,6 +12,7 @@
 #include <global_vars.h>
 #include <event_manager.h>
 #include <world.h>
+
 #include <iostream>
 
 c_player::c_player()
@@ -68,7 +69,7 @@ void c_player::respawn()
 
     this->fall_origin = glm::vec3(FLT_MAX);
 
-    this->health = 20;
+    this->health = this->max_health;
     this->is_alive = true;
 
     this->next_attack_time = this->next_interaction_time = 0.0f;
@@ -78,6 +79,8 @@ void c_player::respawn()
     this->view_angle = this->last_view_angle = glm::vec2(0.0f);
     this->rotation = this->last_rotation = glm::vec3(0.0f);
     this->chunk = this->last_chunk = glm::ivec2(0);
+
+    this->target_blocks.clear();
 }
 
 void c_player::attack()
@@ -367,25 +370,6 @@ void c_player::create_move()
         return false;
         };
 
-    glm::ivec3 round_pos = glm::ivec3(glm::floor(origin));
-
-    std::vector<aabb_t> target_blocks;
-    for (int y = -1; y <= 2; y++) {
-        for (int z = -1; z <= 1; z++) {
-            for (int x = -1; x <= 1; x++) {
-                glm::ivec3 check_pos = round_pos + glm::ivec3(x, y, z);
-                uint32_t block = g_world->get_block_at_local_pos(check_pos) & 0x3FFF;
-                if (block) {
-                    glm::vec3 block_pos = glm::vec3(check_pos);
-                    target_blocks.push_back({
-                        block_pos,
-                        block_pos + glm::vec3(1.0f, 1.0f, 1.0f)
-                        });
-                }
-            }
-        }
-    }
-
     glm::vec3 move_vec = velocity;
     if (is_on_ground && is_sneaking) {
         const float step = 0.05f;
@@ -501,6 +485,8 @@ void c_player::update()
     last_velocity = velocity;
     last_rotation = rotation;
     last_view_angle = view_angle;
+
+    prepare_collision();
 
     update_held_item();
     update_looking_at();
