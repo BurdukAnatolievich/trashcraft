@@ -306,8 +306,7 @@ void c_player::create_move()
             move_yaw = view_angle.y + 180.0f;
     }
 
-    bool is_sneaking = (input.buttons & e_buttons::IN_DUCK) != 0;
-
+    is_sneaking = input.buttons & e_buttons::IN_DUCK;
     if (is_sneaking) {
         is_sprinting = false;
     }

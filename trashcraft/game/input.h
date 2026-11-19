@@ -15,6 +15,7 @@ enum e_key_bindings
     BIND_USE,
     BIND_INVENTORY,
     BIND_SPRINT,
+    BIND_SNEAK,
     BIND_MAX = 200,
 };
 

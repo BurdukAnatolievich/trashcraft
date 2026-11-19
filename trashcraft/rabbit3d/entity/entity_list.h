@@ -111,7 +111,6 @@ public:
 
     bool firstperson_swinging = false;
     float firstperson_hand_swing = 0.0f;
-    float firstperson_last_hand_swing = 0.0f;
 
     void reset();
     void update(float eye_yaw, float eye_pitch);
@@ -179,6 +178,7 @@ public:
 
     bool is_moving = false;
     bool is_sprinting = false;
+    bool is_sneaking = false;
     bool is_jumping = false;
     bool is_on_ground = false;
 

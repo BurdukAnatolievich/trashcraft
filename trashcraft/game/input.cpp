@@ -16,7 +16,8 @@ void c_input::initialize()
     key_bindings[BIND_MOVE_RIGHT] = { ImGuiKey_D, "lang_input_move_right", 0 };
     key_bindings[BIND_MOVE_LEFT] = { ImGuiKey_A, "lang_input_move_left", 0 };
     key_bindings[BIND_JUMP] = { ImGuiKey_Space, "lang_input_move_jump", 0 };
-    key_bindings[BIND_SPRINT] = { ImGuiKey_LeftCtrl, "lang_input_move_sprint", 0, };
+    key_bindings[BIND_SNEAK] = { ImGuiKey_LeftShift, "lang_input_move_sneak", 0 };
+    key_bindings[BIND_SPRINT] = { ImGuiKey_LeftCtrl, "lang_input_move_sprint", 0 };
     key_bindings[BIND_INVENTORY] = { ImGuiKey_E, "lang_input_open_inventory", 0 };
 
     key_bindings[BIND_ATTACK] = { ImGuiKey_MouseLeft, "lang_input_attack", 0 };
@@ -81,6 +82,9 @@ void c_input::handle_player_input()
 
         if (is_bind_down(BIND_SPRINT) || is_bind_double_pressed(BIND_MOVE_FORWARD))
             new_buttons |= e_buttons::IN_SPRINT;
+
+        if (is_bind_down(BIND_SNEAK))
+            new_buttons |= e_buttons::IN_DUCK;
 
         {
             //std::lock_guard<std::mutex> input_guard(input_swap_mutex);
