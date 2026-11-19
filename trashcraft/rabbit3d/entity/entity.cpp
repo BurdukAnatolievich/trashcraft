@@ -32,6 +32,9 @@ void c_entity::update_model()
 
 void c_entity::prepare_collision()
 {
+    target_blocks.clear();
+    target_blocks.reserve(36);
+
     glm::ivec3 round_pos = glm::ivec3(glm::floor(origin));
     for (int y = -1; y <= 2; y++) {
         for (int z = -1; z <= 1; z++) {
