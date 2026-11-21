@@ -69,6 +69,14 @@ void c_texture_manager::initialize()
     std::vector<c_texture*> temp;
     load_textures_from_directory(temp, "blocks/destroy/", TEXTURE_CATEGORY_INTERNAL);
     build_texture_atlas(temp, &decal_atlas);
+
+    push_to_main_array(temp);
+
+    // ANIMATED
+    load_textures_from_directory(temp, "blocks/animated/", TEXTURE_CATEGORY_BLOCK);
+    build_texture_atlas(temp, &animated_atlas);
+
+    push_to_main_array(temp);
     
     // ITEMS
 
@@ -98,7 +106,7 @@ void c_texture_manager::set_flip_texture_vertically(bool flip)
     stbi_set_flip_vertically_on_load(flip);
 }
 
-void c_texture_manager::load_textures_from_directory(std::vector<c_texture*>& _textures, const std::string& path, e_texture_category category)
+void c_texture_manager::load_textures_from_directory(std::vector<c_texture*>& textures, const std::string& path, e_texture_category category)
 {
     for (auto& iterator : std::filesystem::directory_iterator("./textures/" + path)) {
         if (iterator.is_directory()) {
@@ -106,7 +114,7 @@ void c_texture_manager::load_textures_from_directory(std::vector<c_texture*>& _t
         }
 
         const std::filesystem::path& path = iterator.path();
-        create_texture_from_file(_textures, path.stem().string(), path.string(), category);
+        create_texture_from_file(textures, path.stem().string(), path.string(), category);
     }
 }
 
@@ -132,7 +140,7 @@ c_texture* c_texture_manager::find_texture_by_name(const std::string& texture_na
     return nullptr;
 }
 
-bool c_texture_manager::create_texture_from_file(std::vector<c_texture*>& _textures, const std::string& texture_name, const std::string& texture_path, e_texture_category category)
+bool c_texture_manager::create_texture_from_file(std::vector<c_texture*>& textures, const std::string& texture_name, const std::string& texture_path, e_texture_category category)
 {
     c_texture* texture = new c_texture(texture_name, category);
     if (!texture->load_from_file(texture_path)) {
@@ -140,7 +148,7 @@ bool c_texture_manager::create_texture_from_file(std::vector<c_texture*>& _textu
         return false;
     }
 
-    _textures.push_back(texture);
+    textures.push_back(texture);
     return true;
 }
 
@@ -156,7 +164,7 @@ bool c_texture_manager::create_texture_from_file(const std::string& texture_name
     return true;
 }
 
-void c_texture_manager::build_texture_atlas(std::vector<c_texture*>& _textures, c_texture* out)
+void c_texture_manager::build_texture_atlas(std::vector<c_texture*>& textures, c_texture* out)
 {
     if (!out) {
         return;
@@ -171,12 +179,12 @@ void c_texture_manager::build_texture_atlas(std::vector<c_texture*>& _textures, 
     unsigned char* data = new unsigned char[width * height * 4];
     int current_texture_x = 0, current_texture_y = 0;
 
-    for (auto& texture : _textures) {
-        if (texture->size.x > TEXTURE_SIZE || texture->size.y > TEXTURE_SIZE)
+    for (auto& texture : textures) {
+        if (texture->size.x > TEXTURE_SIZE)
             continue;
 
-        for (int y = 0; y < TEXTURE_SIZE; ++y) {
-            for (int x = 0; x < TEXTURE_SIZE; ++x) {
+        for (int y = 0; y < texture->size.y; y++) {
+            for (int x = 0; x < TEXTURE_SIZE; x++) {
                 unsigned char* pixel_offset = data + ((current_texture_y * TEXTURE_SIZE + y) * width + (current_texture_x * TEXTURE_SIZE + x)) * 4;
                 unsigned char* pixel_offset_copy = texture->raw + (y * TEXTURE_SIZE + x) * texture->raw_components;
 

@@ -2,6 +2,7 @@
 
 #include <global_vars.h>
 #include <world.h>
+#include <block.h>
 
 #include <raytrace/scene.h>
 #include <raytrace/render.h>
@@ -42,6 +43,11 @@ void c_entity::prepare_collision()
                 glm::ivec3 check_pos = round_pos + glm::ivec3(x, y, z);
                 uint32_t block = g_world->get_block_at_local_pos(check_pos) & 0x3FFF;
                 if (block) {
+					c_block* block_ptr = (c_block*)g_global_vars->mapped_items[block];
+                    if (!block_ptr || !block_ptr->is_solid) {
+                        continue;
+					}
+
                     glm::vec3 block_pos = glm::vec3(check_pos);
                     target_blocks.push_back({
                         block_pos,

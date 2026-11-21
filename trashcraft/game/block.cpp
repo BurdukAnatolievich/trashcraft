@@ -1,7 +1,7 @@
 #include "block.h"
 #include <raytrace/models.h>
 
-c_block::c_block(std::string register_name, std::string register_id, std::vector<std::string> material_array, glm::vec3 mins, glm::vec3 maxs, float hardness, int mining_tool, int mining_tool_to_drop, std::string drop_item, bool is_solid, bool is_transparent, bool is_light, int block_type, std::string hotbar_texture, int interactable, std::string model)
+c_block::c_block(std::string register_name, std::string register_id, std::vector<std::string> material_array, glm::vec3 mins, glm::vec3 maxs, float hardness, int mining_tool, int mining_tool_to_drop, int mining_tool_class, std::string drop_item, bool is_solid, bool is_transparent, bool is_light, bool is_liquid, int block_type, std::string hotbar_texture, int interactable, std::string model)
 {
     this->type = c_item::e_type::BLOCK;
     this->block_type = block_type;
@@ -16,18 +16,19 @@ c_block::c_block(std::string register_name, std::string register_id, std::vector
 
     this->item_material = g_texture_manager->find_texture_by_name(hotbar_texture);
     this->item_model = g_model_manager->find_model_by_name(hotbar_texture);
-    //this->block_model = g_model_manager->find_model_by_name(model);
 
     this->interactable = interactable;
 
     this->is_solid = is_solid;
     this->is_transparent = is_transparent;
     this->is_light = is_light;
+    this->is_liquid = is_liquid;
 
     this->hardness = hardness;
 
     this->mining_tool = mining_tool;
     this->mining_tool_to_drop = mining_tool_to_drop;
+    this->mining_tool_class = mining_tool_class;
 
     this->drop_item = drop_item != "" ? g_global_vars->items[drop_item] : nullptr;
 

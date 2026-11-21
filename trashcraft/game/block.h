@@ -41,6 +41,7 @@ public:
 
     float hardness = 0.0f;
     int mining_tool = 0, mining_tool_to_drop = 0;
+    int mining_tool_class = 0;
 
     c_item* drop_item = nullptr;
 
@@ -48,9 +49,9 @@ public:
     glm::vec3 max = glm::vec3(1.0f, 1.0f, 1.0f);
 
     int interactable = e_interactable_type::I_NONE;
-    bool is_transparent = false, is_solid = false, is_light = false;
+    bool is_transparent = false, is_solid = false, is_light = false, is_liquid = false;
 
-    c_block(std::string register_name, std::string register_id, std::vector<std::string> material_array, glm::vec3 mins, glm::vec3 maxs, float hardness = 1.0f, int tool = -1, int tool_to_drop = -1, std::string drop_item = "", bool is_solid = true, bool is_transparent = false, bool is_light = false, int block_type = e_block_type::T_DEFAULT, std::string hotbar_texture = "", int interactable = e_interactable_type::I_NONE, std::string model = "none");
+    c_block(std::string register_name, std::string register_id, std::vector<std::string> material_array, glm::vec3 mins, glm::vec3 maxs, float hardness = 1.0f, int tool = -1, int tool_to_drop = -1, int tool_class = -1, std::string drop_item = "", bool is_solid = true, bool is_transparent = false, bool is_light = false, bool is_liquid = false, int block_type = e_block_type::T_DEFAULT, std::string hotbar_texture = "", int interactable = e_interactable_type::I_NONE, std::string model = "none");
 
     c_scene_object* create_scene_object(const glm::vec3& origin, float scale = 1.0f);
 };

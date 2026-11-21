@@ -315,9 +315,13 @@ void c_render::render_block_outline()
 
     current_shader->set_vec3("color", glm::vec3(0.0f, 0.0f, 0.0f));
 
+    glDepthMask(GL_FALSE);
+
     glLineWidth(2.5f);
     render_cube_outline();
     glLineWidth(1.0f);
+
+    glDepthMask(GL_TRUE);
 }
 
 void c_render::render_block_decals()
@@ -335,6 +339,16 @@ void c_render::render_block_decals()
     glDepthMask(GL_FALSE);
     render_cube_textured();
     glDepthMask(GL_TRUE);
+}
+
+void c_render::render_skybox()
+{
+    c_shader* last_shader = current_shader;
+    set_shader(skybox_shader);
+
+
+
+    set_shader(last_shader);
 }
 
 void c_render::render_scene(bool depth, bool process_translucent)
@@ -372,6 +386,7 @@ void c_render::compile_shaders()
     direct_lighting_shader = new c_shader("shaders/direct_lighting.vs", "shaders/direct_lighting.fs");
     outline_shader = new c_shader("shaders/outline.vs", "shaders/outline.fs");
     decal_shader = new c_shader("shaders/decal.vs", "shaders/decal.fs");
+    skybox_shader = new c_shader("shaders/skybox.vs", "shaders/skybox.fs");
 
     depth_buffer_shader->clean();
     direct_lighting_shader->clean();

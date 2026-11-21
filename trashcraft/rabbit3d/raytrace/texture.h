@@ -57,6 +57,7 @@ class c_texture_manager {
 public:
     c_texture decal_atlas;
     c_texture texture_atlas;
+    c_texture animated_atlas;
 
     std::vector<c_texture*> textures;
 
@@ -67,14 +68,16 @@ public:
 
     c_texture* find_texture_by_name(const std::string& texture_name);
 
-    void load_textures_from_directory(std::vector<c_texture*>& _textures, const std::string& path, e_texture_category category = TEXTURE_CATEGORY_MISC);
+    void load_textures_from_directory(std::vector<c_texture*>& textures, const std::string& path, e_texture_category category = TEXTURE_CATEGORY_MISC);
     void load_textures_from_directory(const std::string& path, e_texture_category category = TEXTURE_CATEGORY_MISC);
 
-    bool create_texture_from_file(std::vector<c_texture*>& _textures, const std::string& texture_name, const std::string& texture_path, e_texture_category category = TEXTURE_CATEGORY_MISC);
+    bool create_texture_from_file(std::vector<c_texture*>& textures, const std::string& texture_name, const std::string& texture_path, e_texture_category category = TEXTURE_CATEGORY_MISC);
     bool create_texture_from_file(const std::string& texture_name, const std::string& texture_path, e_texture_category category = TEXTURE_CATEGORY_MISC);
 
     void build_texture_atlas(std::vector<c_texture*>& textures, c_texture* out);
     void build_texture_atlas();
+
+    void push_to_main_array(std::vector<c_texture*>& textures) { this->textures.insert(this->textures.begin(), textures.begin(), textures.end()); textures.clear(); };
 };
 
 extern c_texture_manager* g_texture_manager;

@@ -100,170 +100,212 @@ void c_world::generate_chunk(world_chunk_t* chunk)
         return fallback;
         };
 
-    uint16_t id_stone = get_block_id("stone", 1);
-    uint16_t id_grass = get_block_id("grass_block", id_stone);
-    uint16_t id_dirt = get_block_id("dirt", id_stone);
-    uint16_t id_bedrock = get_block_id("bedrock", id_stone);
-    uint16_t id_sand = get_block_id("sand", id_dirt);
-    uint16_t id_gravel = get_block_id("gravel", id_stone);
-    uint16_t id_water = get_block_id("water", 0);
-    uint16_t id_log = get_block_id("oak_log", 0);
-
-    // Ищем листву по всем возможным именам в регистре (с откатом на cherry_leaves, если oak_leaves не заведены)
+    const uint16_t id_air = 0;
+    const uint16_t id_stone = get_block_id("stone", 1);
+    const uint16_t id_grass = get_block_id("grass_block", id_stone);
+    const uint16_t id_dirt = get_block_id("dirt", id_stone);
+    const uint16_t id_bedrock = get_block_id("bedrock", id_stone);
+    const uint16_t id_sand = get_block_id("sand", id_dirt);
+    const uint16_t id_gravel = get_block_id("gravel", id_stone);
+    const uint16_t id_water = get_block_id("water", 0);
+    const uint16_t id_lava = get_block_id("lava", id_air);
+    const uint16_t id_log = get_block_id("oak_log", 0);
     uint16_t id_leaves = get_block_id("oak_leaves", 0);
     if (id_leaves == 0) id_leaves = get_block_id("leaves", 0);
-    if (id_leaves == 0) id_leaves = get_block_id("cherry_leaves", 0);
 
-    uint16_t id_coal = get_block_id("coal_ore", id_stone);
-    uint16_t id_iron = get_block_id("iron_ore", id_stone);
-    uint16_t id_gold = get_block_id("gold_ore", id_stone);
-    uint16_t id_diamond = get_block_id("diamond_ore", id_stone);
+    const uint16_t id_coal = get_block_id("coal_ore", id_stone);
+    const uint16_t id_iron = get_block_id("iron_ore", id_stone);
+    const uint16_t id_gold = get_block_id("gold_ore", id_stone);
+    const uint16_t id_diamond = get_block_id("diamond_ore", id_stone);
 
-    constexpr int sea_level = WORLD_HEIGHT / 3 - 1;
-    int height_map[CHUNK_SIZE][CHUNK_SIZE]{};
+    constexpr int MAX_HEIGHT = 128;
+    constexpr int SEA_LEVEL = 62;
 
-    for (int z = 0; z < CHUNK_SIZE; z++) {
-        int world_z = world_chunk_z + z;
-        for (int x = 0; x < CHUNK_SIZE; x++) {
-            int world_x = world_chunk_x + x;
+    auto smoothstep = [](double edge0, double edge1, double x) -> double {
+        double t = std::clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+        return t * t * (3.0 - 2.0 * t);
+        };
 
-            double continental = perlin_noise.octave2D_01(world_x * 0.0025, world_z * 0.0025, 4);
-            double mountains = perlin_noise.octave2D_01(world_x * 0.005 + 300.0, world_z * 0.005 + 300.0, 4);
-            double detail = perlin_noise.octave2D_01(world_x * 0.02 + 500.0, world_z * 0.02 + 500.0, 3);
+    for (int x = 0; x < CHUNK_SIZE; x++) {
+        int wx = world_chunk_x + x;
 
-            double height = static_cast<double>(sea_level);
+        for (int z = 0; z < CHUNK_SIZE; z++) {
+            int wz = world_chunk_z + z;
 
-            if (continental < 0.38) {
-                double ocean = (0.38 - continental) / 0.38;
-                height -= ocean * 28.0 - (detail - 0.5) * 4.0;
+            double cont = perlin_noise.octave2D_01(wx * 0.0014, wz * 0.0014, 4);
+            double base_height = 0.0;
+            if (cont < 0.36) {
+                base_height = 30.0 + (cont / 0.36) * 24.0;
+            }
+            else if (cont < 0.50) {
+                double t = smoothstep(0.36, 0.50, cont);
+                base_height = 54.0 + t * 11.0;
             }
             else {
-                double land = (continental - 0.38) / 0.62;
-                height += land * 14.0 + (detail - 0.5) * 6.0;
-
-                if (mountains > 0.55) {
-                    double peak = (mountains - 0.55) / 0.45;
-                    height += (peak * peak) * 55.0 * detail;
-                }
+                double t = (cont - 0.50) / 0.50;
+                base_height = 65.0 + t * 8.0;
             }
 
-            double river_val = std::abs(perlin_noise.octave2D_01(world_x * 0.0035 + 800.0, world_z * 0.0035 + 800.0, 3) - 0.5);
-            constexpr double river_width = 0.022;
-            bool is_river = false;
+            double land_mask = smoothstep(0.42, 0.55, cont);
+            double hills = (perlin_noise.octave2D_01(wx * 0.011, wz * 0.011, 3) - 0.5) * 10.0;
+            base_height += hills * land_mask;
 
-            if (river_val < river_width && continental >= 0.35) {
-                double t = river_val / river_width;
-                double smooth_t = t * t * (3.0 - 2.0 * t);
-                double river_bed = sea_level - 4.0 + (detail - 0.5) * 2.0;
+            double inland_mask = smoothstep(0.50, 0.65, cont);
+            double m_noise = perlin_noise.octave2D_01(wx * 0.0045 + 1500.0, wz * 0.0045 + 1500.0, 3);
+            double mountain_strength = smoothstep(0.45, 0.80, m_noise) * inland_mask;
 
-                height = river_bed + (std::min(height, sea_level + 12.0) - river_bed) * smooth_t;
-                if (height < sea_level) is_river = true;
-            }
+            double ridge_raw = perlin_noise.octave2D_01(wx * 0.012 + 400.0, wz * 0.012 + 400.0, 4);
+            double ridge = 1.0 - std::abs(ridge_raw * 2.0 - 1.0);
+            base_height += mountain_strength * (18.0 + std::pow(ridge, 1.5) * 32.0);
 
-            int surface_y = std::clamp(static_cast<int>(height), 4, WORLD_HEIGHT - 2);
-            height_map[z][x] = surface_y;
+            double cliff_power = mountain_strength * 22.0;
 
-            for (int y = 0; y < WORLD_HEIGHT; y++) {
+            int stone_depth = 0;
+
+            uint32_t col_seed = static_cast<uint32_t>(wx * 73856093 ^ wz * 19349663);
+            std::mt19937 rng(col_seed ^ random_seed);
+
+            for (int y = MAX_HEIGHT - 1; y >= 0; y--) {
                 glm::ivec3 pos(x, y, z);
 
-                if (y == 0) {
+                if (y == 0 || (y <= 4 && (rng() % (y + 1) == 0))) {
                     chunk->set_block(pos, id_bedrock);
                     continue;
                 }
 
-                int max_cave_y = (surface_y >= sea_level) ? (surface_y + 1) : (surface_y - 3);
-                if (y > 2 && y < max_cave_y) {
-                    double c1 = perlin_noise.octave3D_01(world_x * 0.035, y * 0.05, world_z * 0.035, 2) - 0.5;
-                    double c2 = perlin_noise.octave3D_01(world_x * 0.035 + 400.0, y * 0.05, world_z * 0.035 + 400.0, 2) - 0.5;
-                    double cavern = perlin_noise.octave3D_01(world_x * 0.02 + 900.0, y * 0.03, world_z * 0.02 + 900.0, 2);
+                double noise_3d = 0.0;
+                if (cliff_power > 0.2 && y > SEA_LEVEL) {
+                    noise_3d = perlin_noise.octave3D(wx * 0.028, y * 0.055, wz * 0.028, 3) * cliff_power;
+                }
 
-                    if ((c1 * c1 + c2 * c2) < 0.0022 || cavern > 0.78) {
-                        chunk->set_block(pos, 0);
-                        continue;
+                double density = (base_height - y) + noise_3d;
+                if (y > 112) {
+                    density -= (y - 112) * 2.5;
+                }
+
+                bool is_cave = false;
+                if (y > 4 && y < MAX_HEIGHT - 12 && density > 0.0) {
+                    // Переводим octave3D из [-1..1] в понятный диапазон [0..1]
+                    double n1 = perlin_noise.octave3D(wx * 0.014 + 3000.0, y * 0.025, wz * 0.014 + 3000.0, 2) * 0.5 + 0.5;
+                    double n2 = perlin_noise.octave3D(wx * 0.018 + 7000.0, y * 0.030, wz * 0.018 + 7000.0, 2) * 0.5 + 0.5;
+
+                    bool big_cheese = (n1 > 0.88);
+                    bool wide_tunnel = (std::abs(n1 - 0.5) < 0.075 && std::abs(n2 - 0.5) < 0.075);
+
+                    if (big_cheese || wide_tunnel) {
+                        if (density > 7.0 || (cliff_power > 5.0 && density > 2.5)) {
+                            is_cave = true;
+                        }
                     }
                 }
 
-                if (y < surface_y - 3) {
-                    uint16_t ore_id = id_stone;
+                if (density > 0.0 && !is_cave) {
+                    uint16_t block_to_place = id_stone;
 
-                    // Жилы руд через 3D-шум (сдвиги координат, чтобы руды не пересекались)
-                    if (y < 16 && perlin_noise.octave3D_01(world_x * 0.14 + 1100.0, y * 0.14, world_z * 0.14, 1) > 0.80) {
-                        ore_id = id_diamond;
+                    bool is_steep_cliff = (cliff_power > 6.0 && std::abs(noise_3d) > 6.5 && y > SEA_LEVEL + 4);
+                    if (stone_depth == 0) {
+                        if (y < SEA_LEVEL - 1) {
+                            block_to_place = (perlin_noise.octave2D_01(wx * 0.04, wz * 0.04, 2) > 0.6) ? id_gravel : id_sand;
+                        }
+                        else if (y <= SEA_LEVEL + 2) {
+                            block_to_place = id_sand;
+                        }
+                        else if (is_steep_cliff || y > 98) {
+                            block_to_place = id_stone;
+                        }
+                        else {
+                            block_to_place = id_grass;
+                        }
                     }
-                    else if (y < 32 && perlin_noise.octave3D_01(world_x * 0.13 + 2200.0, y * 0.13, world_z * 0.13, 1) > 0.78) {
-                        ore_id = id_gold;
-                    }
-                    else if (y < 64 && perlin_noise.octave3D_01(world_x * 0.12 + 3300.0, y * 0.12, world_z * 0.12, 1) > 0.75) {
-                        ore_id = id_iron;
-                    }
-                    else if (perlin_noise.octave3D_01(world_x * 0.10 + 4400.0, y * 0.10, world_z * 0.10, 1) > 0.73) {
-                        ore_id = id_coal;
+                    else if (stone_depth <= 3) {
+                        if (y <= SEA_LEVEL + 2) {
+                            block_to_place = id_sand;
+                        }
+                        else if (is_steep_cliff || y > 98) {
+                            block_to_place = id_stone;
+                        }
+                        else {
+                            block_to_place = id_dirt;
+                        }
                     }
 
-                    chunk->set_block(pos, ore_id);
-                }
-                else if (y < surface_y) {
-                    chunk->set_block(pos, (surface_y <= sea_level + 2) ? id_sand : id_dirt);
-                }
-                else if (y == surface_y) {
-                    if (surface_y < sea_level) {
-                        chunk->set_block(pos, is_river ? id_gravel : id_sand);
-                    }
-                    else if (surface_y <= sea_level + 2 && !is_river) {
-                        chunk->set_block(pos, id_sand);
-                    }
-                    else if (surface_y > sea_level + 32) {
-                        chunk->set_block(pos, id_stone);
-                    }
-                    else {
-                        chunk->set_block(pos, id_grass);
-                    }
-                }
-                else if (y <= sea_level) {
-                    chunk->set_block(pos, id_water);
+                    chunk->set_block(pos, block_to_place);
+                    stone_depth++;
                 }
                 else {
-                    chunk->set_block(pos, 0);
+                    stone_depth = 0;
+
+                    if (is_cave && y <= 10) {
+                        chunk->set_block(pos, id_lava);
+                    }
+                    else if (y < SEA_LEVEL && !is_cave) {
+                        chunk->set_block(pos, id_water);
+                    }
+                    else {
+                        chunk->set_block(pos, id_air);
+                    }
                 }
             }
         }
     }
 
-    if (id_log != 0 && id_leaves != 0) {
-        for (int z = 2; z < CHUNK_SIZE - 2; z++) {
-            int world_z = world_chunk_z + z;
-            for (int x = 2; x < CHUNK_SIZE - 2; x++) {
-                int world_x = world_chunk_x + x;
-                int sy = height_map[z][x];
+    uint32_t chunk_seed = static_cast<uint32_t>(chunk->index.x * 341873128712ULL + chunk->index.y * 132897987541ULL);
+    std::mt19937 chunk_rng(chunk_seed ^ random_seed);
 
-                if (sy <= sea_level + 2 || sy > sea_level + 32) continue;
+    auto spawn_ore_vein = [&](uint16_t ore_id, int count, int max_y, int vein_size) {
+        if (ore_id == id_stone) return;
+        for (int i = 0; i < count; i++) {
+            int vx = chunk_rng() % CHUNK_SIZE;
+            int vy = 5 + (chunk_rng() % std::max(1, max_y - 5));
+            int vz = chunk_rng() % CHUNK_SIZE;
 
-                double forest_density = perlin_noise.octave2D_01(world_x * 0.01 + 5500.0, world_z * 0.01 + 5500.0, 2);
-                double tree_spot = perlin_noise.noise2D_01(world_x * 0.85, world_z * 0.85);
-
-                double threshold = (forest_density > 0.52) ? 0.84 : 0.94; 
-                if (tree_spot < threshold) continue;
-
-                int trunk_h = 4 + ((world_x * 31 + world_z * 17) & 1);
-                if (sy + trunk_h + 2 >= WORLD_HEIGHT) continue;
-
-                for (int ly = sy + trunk_h - 2; ly <= sy + trunk_h + 1; ly++) {
-                    int radius = (ly >= sy + trunk_h) ? 1 : 2;
-                    for (int lz = z - radius; lz <= z + radius; lz++) {
-                        for (int lx = x - radius; lx <= x + radius; lx++) {
-                            if (std::abs(lx - x) == radius && std::abs(lz - z) == radius && ((ly + lx + lz) & 1)) {
-                                continue;
-                            }
-                            glm::ivec3 lpos(lx, ly, lz);
-                            if (chunk->get_block(lpos) == 0) {
-                                chunk->set_block(lpos, id_leaves);
-                            }
-                        }
+            for (int b = 0; b < vein_size; b++) {
+                glm::ivec3 p(vx, vy, vz);
+                if (vx >= 0 && vx < CHUNK_SIZE && vy > 0 && vy < MAX_HEIGHT && vz >= 0 && vz < CHUNK_SIZE) {
+                    if (chunk->get_block(p) == id_stone) {
+                        chunk->set_block(p, ore_id);
                     }
                 }
+                vx += (int)(chunk_rng() % 3) - 1;
+                vy += (int)(chunk_rng() % 3) - 1;
+                vz += (int)(chunk_rng() % 3) - 1;
+            }
+        }
+        };
 
-                for (int ty = 1; ty <= trunk_h; ty++) {
-                    chunk->set_block(glm::ivec3(x, sy + ty, z), id_log);
+    spawn_ore_vein(id_coal, 16, 110, 10);
+    spawn_ore_vein(id_iron, 14, 64, 7);
+    spawn_ore_vein(id_gold, 4, 32, 6);
+    spawn_ore_vein(id_diamond, 2, 16, 5);
+
+    if (id_log != 0 && id_leaves != 0) {
+        double forest_density = perlin_noise.octave2D_01(world_chunk_x * 0.008 + 900.0, world_chunk_z * 0.008 + 900.0, 2);
+        int trees_in_chunk = (forest_density > 0.55) ? (3 + chunk_rng() % 4) : (chunk_rng() % 2);
+
+        for (int t = 0; t < trees_in_chunk; t++) {
+            int tx = 2 + (chunk_rng() % (CHUNK_SIZE - 4));
+            int tz = 2 + (chunk_rng() % (CHUNK_SIZE - 4));
+
+            for (int y = MAX_HEIGHT - 12; y > SEA_LEVEL + 2; y--) {
+                if (chunk->get_block(glm::ivec3(tx, y, tz)) == id_grass) {
+                    int trunk_h = 4 + (chunk_rng() % 3);
+
+                    for (int ly = y + trunk_h - 2; ly <= y + trunk_h + 1; ly++) {
+                        int radius = (ly >= y + trunk_h) ? 1 : 2;
+                        for (int lx = tx - radius; lx <= tx + radius; lx++) {
+                                for (int lz = tz - radius; lz <= tz + radius; lz++) {
+                                    if (std::abs(lx - tx) == radius && std::abs(lz - tz) == radius && (chunk_rng() % 2 == 0)) continue;
+                                    glm::ivec3 lpos(lx, ly, lz);
+                                    if (chunk->get_block(lpos) == id_air) {
+                                        chunk->set_block(lpos, id_leaves);
+                                    }
+                                }
+                        }
+                    }
+                    for (int ty = 1; ty <= trunk_h; ty++) {
+                        chunk->set_block(glm::ivec3(tx, y + ty, tz), id_log);
+                    }
+                    break;
                 }
             }
         }
@@ -310,24 +352,24 @@ void c_world::generate_world_based_on_player_position()
     int radius = g_config->render.render_distance;
     int unload_radius = radius + 2;
 
-    //for (auto it = chunks.begin(); it != chunks.end(); ) {
-    //    world_chunk_t* chunk = it->second;
-    //    if (!chunk) {
-    //        it = chunks.erase(it);
-    //        continue;
-    //    }
+    for (auto it = chunks.begin(); it != chunks.end(); ) {
+        world_chunk_t* chunk = it->second;
+        if (!chunk) {
+            it = chunks.erase(it);
+            continue;
+        }
 
-    //    int dx = chunk->index.x - local->chunk.x;
-    //    int dz = chunk->index.y - local->chunk.y;
+        int dx = chunk->index.x - local->chunk.x;
+        int dz = chunk->index.y - local->chunk.y;
 
-    //    if (std::abs(dx) > unload_radius || std::abs(dz) > unload_radius) {
-    //        delete chunk;
-    //        it = chunks.erase(it);
-    //    }
-    //    else {
-    //        ++it;
-    //    }
-    //}
+        if (std::abs(dx) > unload_radius || std::abs(dz) > unload_radius) {
+            delete chunk;
+            it = chunks.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
 
     std::vector<world_chunk_t*> chunks_to_generate;
     for (int dz = -radius; dz <= radius; dz++) {
@@ -608,7 +650,7 @@ void c_world::build_chunk_mesh(world_chunk_t* chunk)
         translucent_mesh->clear();
     }
     else {
-        translucent_mesh = chunk->translucent_mesh = new c_mesh("t_chunk##" + std::to_string(chunk->index.x) + std::to_string(chunk->index.y), glm::vec3(glm::vec2(chunk->index) * glm::vec2(CHUNK_SIZE, CHUNK_SIZE), 0.0f), &g_texture_manager->texture_atlas);
+        translucent_mesh = chunk->translucent_mesh = new c_mesh("t_chunk##" + std::to_string(chunk->index.x) + std::to_string(chunk->index.y), glm::vec3(glm::vec2(chunk->index) * glm::vec2(CHUNK_SIZE, CHUNK_SIZE), 0.0f), &g_texture_manager->animated_atlas);
     }
 
     if (last_translucent_mesh_size) {

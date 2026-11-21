@@ -30,6 +30,8 @@ class c_render
     c_shader* direct_lighting_shader = NULL;
     c_shader* outline_shader = NULL;
     c_shader* decal_shader = NULL;
+    c_shader* water_shader = NULL;
+    c_shader* skybox_shader = NULL;
 
     c_shader* current_shader = NULL;
 
@@ -54,8 +56,6 @@ public:
 
     void compile_shaders();
 
-    GLuint bake_model_icon(c_model* model, int size = 64);
-
     void render_cube_outline();
     void render_cube_textured();
 
@@ -70,6 +70,7 @@ public:
     void render_block_outline();
     void render_block_decals();
 
+    void render_skybox();
     void render_scene(bool depth = false, bool process_translucent = true);
     void render_main();
 
